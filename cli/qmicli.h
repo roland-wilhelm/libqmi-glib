@@ -31,6 +31,5 @@ GOptionGroup *qmicli_ctl_get_option_group (void);
 gboolean      qmicli_ctl_options_enabled  (void);
 void          qmicli_ctl_run              (QmiDevice *device,
                                            GCancellable *cancellable);
-void          qmicli_ctl_shutdown         (void);
 
 #endif /* __QMICLI_H__ */
