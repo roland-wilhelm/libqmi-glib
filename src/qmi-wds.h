@@ -36,6 +36,7 @@ typedef enum {
   QMI_WDS_MESSAGE_STOP_NETWORK  = 0x0021,
   QMI_WDS_MESSAGE_GET_PACKET_SERVICE_STATUS  = 0x0022,
   QMI_WDS_MESSAGE_GET_DATA_BEARER_TECHNOLOGY = 0x0037,
+  QMI_WDS_MESSAGE_GET_DUN_CALL_INFO	=	0x0038,
   QMI_WDS_MESSAGE_GET_CURRENT_DATA_BEARER_TECHNOLOGY = 0x0044
 } QmiWdsMessage;
 
@@ -203,6 +204,30 @@ QmiWdsRat3gpp2    qmi_wds_get_current_data_bearer_technology_output_get_last_rat
 QmiWdsRat3gpp     qmi_wds_get_current_data_bearer_technology_output_get_last_rat_3gpp (QmiWdsGetCurrentDataBearerTechnologyOutput *output);
 QmiWdsSoCdma1x    qmi_wds_get_current_data_bearer_technology_output_get_last_so_cdma1x (QmiWdsGetCurrentDataBearerTechnologyOutput *output);
 QmiWdsSoEvdoRevA  qmi_wds_get_current_data_bearer_technology_output_get_last_so_evdo_reva (QmiWdsGetCurrentDataBearerTechnologyOutput *output);
+
+
+/*****************************************************************************/
+/* Get Dun Call Info */
+
+typedef struct _QmiWdsDunCallOutput QmiWdsDunCallOutput;
+QmiWdsDunCallOutput*	qmi_wds_get_dun_call_output_ref(QmiWdsDunCallOutput *output);
+void                    qmi_wds_get_dun_call_output_unref(QmiWdsDunCallOutput *output);
+gboolean                qmi_wds_get_dun_call_output_get_result(QmiWdsDunCallOutput *output, GError **error);
+
+const guint64
+qmi_wds_get_dun_call_output_get_tx_bytes_ok(QmiWdsDunCallOutput *output);
+const guint64
+qmi_wds_get_dun_call_output_get_rx_bytes_ok(QmiWdsDunCallOutput *output);
+const guint32
+qmi_wds_get_dun_call_output_get_current_channel_rx_rate(QmiWdsDunCallOutput *output);
+const guint32
+qmi_wds_get_dun_call_output_get_current_channel_tx_rate(QmiWdsDunCallOutput *output);
+const guint32
+qmi_wds_get_dun_call_output_get_max_channel_tx_rate(QmiWdsDunCallOutput *output);
+const guint32
+qmi_wds_get_dun_call_output_get_max_channel_rx_rate(QmiWdsDunCallOutput *output);
+
+
 
 G_END_DECLS
 

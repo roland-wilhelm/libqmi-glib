@@ -54,11 +54,13 @@ libqmi_glib_la_SOURCES = \
 	qmi-message-ctl.h qmi-message-ctl.c \
 	qmi-message-dms.h qmi-message-dms.c \
 	qmi-message-wds.h qmi-message-wds.c \
+	qmi-message-nas.h qmi-message-nas.c \
 	qmi-device.h qmi-device.c \
 	qmi-client.h qmi-client.c \
 	qmi-ctl.h qmi-client-ctl.h qmi-client-ctl.c \
 	qmi-dms.h qmi-client-dms.h qmi-client-dms.c \
-	qmi-wds.h qmi-client-wds.h qmi-client-wds.c
+	qmi-wds.h qmi-client-wds.h qmi-client-wds.c \
+	qmi-nas.h qmi-client-nas.h qmi-client-nas.c
 
 libqmi_glib_la_LIBADD = \
 	$(LIBQMI_GLIB_LIBS)
@@ -71,4 +73,5 @@ include_HEADERS = \
 	qmi-device.h \
 	qmi-client.h \
 	qmi-dms.h qmi-client-dms.h \
-	qmi-wds.h qmi-client-wds.h
+	qmi-wds.h qmi-client-wds.h \
+	qmi-nas.h qmi-client-nas.h

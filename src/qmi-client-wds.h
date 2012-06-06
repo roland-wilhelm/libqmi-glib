@@ -111,6 +111,21 @@ QmiWdsGetCurrentDataBearerTechnologyOutput *qmi_client_wds_get_current_data_bear
                                                                                                       GAsyncResult *res,
                                                                                                       GError **error);
 
+/*****************************************************************************/
+/* Get Dun Call Info */
+
+QmiWdsDunCallOutput*
+qmi_client_wds_get_dun_call_finish(QmiClientWds *self, GAsyncResult *res, GError **error);
+
+void
+qmi_client_wds_get_dun_call(QmiClientWds *self,
+							guint timeout,
+							GCancellable *cancellable,
+							GAsyncReadyCallback callback,
+							gpointer user_data);
+
+
+
 G_END_DECLS
 
 #endif /* _LIBQMI_GLIB_QMI_CLIENT_WDS_H_ */

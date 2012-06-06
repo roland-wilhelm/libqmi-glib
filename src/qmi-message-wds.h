@@ -70,7 +70,15 @@ QmiWdsGetDataBearerTechnologyOutput *qmi_message_wds_get_data_bearer_technology_
 QmiMessage                                 *qmi_message_wds_get_current_data_bearer_technology_new         (guint8 transaction_id,
                                                                                                             guint8 client_id);
 QmiWdsGetCurrentDataBearerTechnologyOutput *qmi_message_wds_get_current_data_bearer_technology_reply_parse (QmiMessage *self,
-                                                                                                            GError **error);
+                                                                                                        GError **error);
+
+
+/*****************************************************************************/
+/* Get Dun Call Info */
+
+QmiMessage*				qmi_message_wds_get_dun_call_new         (guint8 transaction_id, guint8 client_id, GError **error);
+QmiWdsDunCallOutput*	qmi_message_wds_get_dun_call_reply_parse (QmiMessage *self, GError **error);
+
 
 G_END_DECLS
 

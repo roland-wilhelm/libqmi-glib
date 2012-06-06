@@ -81,7 +81,7 @@ qmi_client_get_device (QmiClient *self)
  *
  * Returns: a #GObject. Do not free the returned object, it is owned by @self.
  */
-GObject *
+GObject*
 qmi_client_peek_device (QmiClient *self)
 {
     g_return_val_if_fail (QMI_IS_CLIENT (self), NULL);

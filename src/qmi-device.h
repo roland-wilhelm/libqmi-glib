@@ -42,6 +42,12 @@ typedef struct _QmiDevice QmiDevice;
 typedef struct _QmiDeviceClass QmiDeviceClass;
 typedef struct _QmiDevicePrivate QmiDevicePrivate;
 
+#ifndef _QMICLIENT
+#define _QMICLIENT
+typedef struct _QmiClient QmiClient;
+#endif
+
+
 #define QMI_DEVICE_FILE       "device-file"
 #define QMI_DEVICE_CLIENT_CTL "device-client-ctl"
 
@@ -103,6 +109,7 @@ void          qmi_device_allocate_client        (QmiDevice *self,
                                                  GCancellable *cancellable,
                                                  GAsyncReadyCallback callback,
                                                  gpointer user_data);
+
 QmiClient    *qmi_device_allocate_client_finish (QmiDevice *self,
                                                  GAsyncResult *res,
                                                  GError **error);

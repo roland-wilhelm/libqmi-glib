@@ -10,7 +10,8 @@ qmicli_SOURCES = \
 	qmicli.c \
 	qmicli.h \
 	qmicli-dms.c \
-	qmicli-wds.c
+	qmicli-wds.c \
+	qmicli-nas.c
 
 qmicli_LDADD = \
 	$(QMICLI_LIBS) \

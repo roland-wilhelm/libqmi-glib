@@ -1413,3 +1413,199 @@ qmi_message_wds_get_current_data_bearer_technology_reply_parse (QmiMessage *self
 
     return output;
 }
+
+/*****************************************************************************/
+/* Get Dun Call Info */
+
+enum {
+	QMI_WDS_TLV_GET_TX_BYTES_OK	=	0x12,
+	QMI_WDS_TLV_GET_RX_BYTES_OK	=	0x13,
+	QMI_WDS_TLV_GET_CHANNEL_RATE	=	0x16,
+
+};
+
+enum {
+	QMI_WDS_TLV_SET_REQUEST_INFO = 0x01
+};
+
+struct _QmiWdsBytesOk {
+	guint64 tx_bytes_ok;
+	guint64 rx_bytes_ok;
+}__attribute__((__packed__));
+
+struct _QmiWdsChannelRate {
+	guint32 current_channel_tx_rate;
+	guint32 current_channel_rx_rate;
+	guint32 max_channel_tx_rate;
+	guint32 max_channel_rx_rate;
+}__attribute__((__packed__));
+
+struct _QmiWdsDunCallOutput {
+	volatile gint ref_count;
+	GError *error;
+	struct _QmiWdsBytesOk bytes_ok;
+	struct _QmiWdsChannelRate channel_rate;
+
+};
+
+const guint64
+qmi_wds_get_dun_call_output_get_tx_bytes_ok(QmiWdsDunCallOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le64toh(output->bytes_ok.tx_bytes_ok);
+}
+
+const guint64
+qmi_wds_get_dun_call_output_get_rx_bytes_ok(QmiWdsDunCallOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le64toh(output->bytes_ok.rx_bytes_ok);
+}
+
+const guint32
+qmi_wds_get_dun_call_output_get_current_channel_rx_rate(QmiWdsDunCallOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->channel_rate.current_channel_rx_rate);
+}
+
+const guint32
+qmi_wds_get_dun_call_output_get_current_channel_tx_rate(QmiWdsDunCallOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->channel_rate.current_channel_tx_rate);
+}
+
+const guint32
+qmi_wds_get_dun_call_output_get_max_channel_tx_rate(QmiWdsDunCallOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->channel_rate.max_channel_tx_rate);
+}
+
+const guint32
+qmi_wds_get_dun_call_output_get_max_channel_rx_rate(QmiWdsDunCallOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->channel_rate.max_channel_rx_rate);
+}
+
+QmiMessage*
+qmi_message_wds_get_dun_call_new(guint8 transaction_id,
+                                   guint8 client_id,
+                                   GError **error)
+{
+    QmiMessage *message;
+    guint32 mask = 0;
+    mask |= (1 << 2);	/* Tx/ Rx bytes ok */
+    mask |= (1 << 5);	/* Channel rate */
+
+
+    message = qmi_message_new(QMI_SERVICE_WDS,
+    							client_id,
+    							transaction_id,
+    							QMI_WDS_MESSAGE_GET_DUN_CALL_INFO);
+
+
+        if(!qmi_message_tlv_add(message,
+        						QMI_WDS_TLV_SET_REQUEST_INFO,
+                                sizeof(mask),
+                                &mask,
+                                error)) {
+            g_prefix_error (error, "Failed to add Request Info to message: ");
+            qmi_message_unref (message);
+            return NULL;
+        }
+
+
+
+    return message;
+}
+
+gboolean
+qmi_wds_get_dun_call_output_get_result (QmiWdsDunCallOutput *output,
+                                         GError **error)
+{
+    g_return_val_if_fail (output != NULL, FALSE);
+
+    if (output->error) {
+        if (error)
+            *error = g_error_copy (output->error);
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+QmiWdsDunCallOutput *
+qmi_wds_get_dun_call_output_ref (QmiWdsDunCallOutput *output)
+{
+    g_return_val_if_fail (output != NULL, NULL);
+
+    g_atomic_int_inc (&output->ref_count);
+    return output;
+}
+
+
+void
+qmi_wds_get_dun_call_output_unref (QmiWdsDunCallOutput *output)
+{
+    g_return_if_fail (output != NULL);
+
+    if (g_atomic_int_dec_and_test (&output->ref_count)) {
+        if (output->error)
+            g_error_free (output->error);
+        g_slice_free (QmiWdsDunCallOutput, output);
+    }
+}
+
+QmiWdsDunCallOutput *
+qmi_message_wds_get_dun_call_reply_parse (QmiMessage *self,
+                                           GError **error)
+{
+	QmiWdsDunCallOutput *output;
+    GError *inner_error = NULL;
+
+    g_assert (qmi_message_get_message_id (self) == QMI_WDS_MESSAGE_GET_DUN_CALL_INFO);
+
+    if (!qmi_message_get_response_result (self, &inner_error)) {
+        /* Only QMI protocol errors are set in the Output result, all the
+         * others (e.g. failures parsing) are directly propagated to error. */
+        if (inner_error->domain != QMI_PROTOCOL_ERROR) {
+            g_propagate_error (error, inner_error);
+            return NULL;
+        }
+
+        /* Otherwise, build output */
+    }
+
+
+
+    qmi_message_tlv_get(self,
+						QMI_WDS_TLV_GET_TX_BYTES_OK,
+						sizeof(output->bytes_ok.tx_bytes_ok),
+						&output->bytes_ok.tx_bytes_ok,
+						NULL);
+
+    qmi_message_tlv_get(self,
+						QMI_WDS_TLV_GET_RX_BYTES_OK,
+						sizeof(output->bytes_ok.rx_bytes_ok),
+						&output->bytes_ok.rx_bytes_ok,
+						NULL);
+
+    qmi_message_tlv_get(self,
+    					QMI_WDS_TLV_GET_CHANNEL_RATE,
+						sizeof(output->channel_rate),
+						&output->channel_rate,
+						NULL);
+
+    return output;
+}

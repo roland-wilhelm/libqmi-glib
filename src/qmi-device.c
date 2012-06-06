@@ -35,6 +35,7 @@
 #include "qmi-utils.h"
 #include "qmi-error-types.h"
 #include "qmi-enum-types.h"
+#include "qmi-client-nas.h"
 
 static void async_initable_iface_init (GAsyncInitableIface *iface);
 
@@ -571,6 +572,10 @@ qmi_device_allocate_client (QmiDevice *self,
     case QMI_SERVICE_WDS:
         ctx->client_type = QMI_TYPE_CLIENT_WDS;
         break;
+
+    case QMI_SERVICE_NAS:
+            ctx->client_type = QMI_TYPE_CLIENT_NAS;
+           break;
 
     default:
         g_simple_async_result_set_error (ctx->result,

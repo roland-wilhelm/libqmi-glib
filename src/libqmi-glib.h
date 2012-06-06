@@ -31,5 +31,6 @@
 #include "qmi-client.h"
 #include "qmi-client-dms.h"
 #include "qmi-client-wds.h"
+#include "qmi-client-nas.h"
 
 #endif /* _LIBQMI_GLIB_H_ */

@@ -52,6 +52,7 @@ static gchar *stop_network_str;
 static gboolean get_packet_service_status_flag;
 static gboolean get_data_bearer_technology_flag;
 static gboolean get_current_data_bearer_technology_flag;
+static gboolean get_dun_call_flag;
 static gboolean noop_flag;
 
 static GOptionEntry entries[] = {
@@ -79,6 +80,10 @@ static GOptionEntry entries[] = {
       "Get current data bearer technology",
       NULL
     },
+    { "wds-get-dun_call", 0, 0, G_OPTION_ARG_NONE, &get_dun_call_flag,
+	  "Rx/Tx bytes ok, channel rate",
+	  NULL
+	},
     { "wds-noop", 0, 0, G_OPTION_ARG_NONE, &noop_flag,
       "Just allocate or release a WDS client. Use with `--client-no-release-cid' and/or `--client-cid'",
       NULL
@@ -115,7 +120,8 @@ qmicli_wds_options_enabled (void)
                  get_packet_service_status_flag +
                  get_data_bearer_technology_flag +
                  get_current_data_bearer_technology_flag +
-                 noop_flag);
+                 noop_flag+
+                 get_dun_call_flag);
 
     if (n_actions > 1) {
         g_printerr ("error: too many WDS actions requested\n");
@@ -538,6 +544,42 @@ get_current_data_bearer_technology_ready (QmiClientWds *client,
     shutdown (TRUE);
 }
 
+static void
+get_dun_call_ready(QmiClientWds *client, GAsyncResult *res)
+{
+    GError *error = NULL;
+    QmiWdsDunCallOutput *output;
+
+    output = qmi_client_wds_get_dun_call_finish(client, res, &error);
+    if(!output) {
+        g_printerr("error: operation failed: %s\n",
+                  error->message);
+        g_error_free(error);
+        shutdown (FALSE);
+        return;
+    }
+
+    if(!qmi_wds_get_dun_call_output_get_result(output, &error)) {
+        g_printerr("error: couldn't get dun call info: %s\n", error->message);
+        g_error_free(error);
+        qmi_wds_get_dun_call_output_unref(output);
+        shutdown(FALSE);
+        return;
+    }
+
+    g_print("[%s] Dun call info retrieved:\n", qmi_device_get_path_display(ctx->device));
+    g_print("\tTx bytes ok: %llu\n", qmi_wds_get_dun_call_output_get_tx_bytes_ok(output));
+    g_print("\tRx bytes ok: %llu\n", qmi_wds_get_dun_call_output_get_rx_bytes_ok(output));
+    g_print("\tTx current channel rate: %u\n", qmi_wds_get_dun_call_output_get_current_channel_tx_rate(output));
+    g_print("\tRx current channel rate: %u\n", qmi_wds_get_dun_call_output_get_current_channel_rx_rate(output));
+    g_print("\tTx max. channel rate: %u\n", qmi_wds_get_dun_call_output_get_max_channel_tx_rate(output));
+    g_print("\tRx max. channel rate: %u\n", qmi_wds_get_dun_call_output_get_max_channel_rx_rate(output));
+
+    qmi_wds_get_dun_call_output_unref(output);
+    shutdown(TRUE);
+}
+
+
 static gboolean
 noop_cb (gpointer unused)
 {
@@ -623,6 +665,17 @@ qmicli_wds_run (QmiDevice *device,
                                                            NULL);
         return;
     }
+
+    /* Request to get dun call info? */
+   if (get_dun_call_flag) {
+	   g_debug ("Asynchronously getting dun call info...");
+	   qmi_client_wds_get_dun_call(ctx->client,
+									10,
+									ctx->cancellable,
+									(GAsyncReadyCallback)get_dun_call_ready,
+									NULL);
+	   return;
+   }
 
     /* Just client allocate/release? */
     if (noop_flag) {

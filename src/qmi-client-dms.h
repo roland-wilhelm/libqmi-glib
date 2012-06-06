@@ -51,15 +51,124 @@ struct _QmiClientDmsClass {
 
 GType qmi_client_dms_get_type (void);
 
+/*****************************************************************************/
 /* Get IDs */
 void                qmi_client_dms_get_ids        (QmiClientDms *self,
                                                    guint timeout,
                                                    GCancellable *cancellable,
                                                    GAsyncReadyCallback callback,
                                                    gpointer user_data);
+
 QmiDmsGetIdsOutput *qmi_client_dms_get_ids_finish (QmiClientDms *self,
                                                    GAsyncResult *res,
                                                    GError **error);
+
+/*****************************************************************************/
+/* Get Operation Mode */
+void                qmi_client_dms_get_op_mode (QmiClientDms *self,
+                                                   guint timeout,
+                                                   GCancellable *cancellable,
+                                                   GAsyncReadyCallback callback,
+                                                   gpointer user_data);
+
+QmiDmsGetOpModeOutput* qmi_client_dms_get_op_mode_finish (QmiClientDms *self,
+                                                   GAsyncResult *res,
+                                                   GError **error);
+
+/*****************************************************************************/
+/* Get Device Mfr */
+
+QmiDmsGetDevMfrOutput*
+qmi_client_dms_get_dev_mfr_finish (QmiClientDms *self,
+                               GAsyncResult *res,
+                               GError **error);
+
+void
+qmi_client_dms_get_dev_mfr (QmiClientDms *self,
+                        guint timeout,
+                        GCancellable *cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data);
+
+/*****************************************************************************/
+/* Get Device Model ID */
+
+QmiDmsGetDevModelIdOutput*
+qmi_client_dms_get_dev_model_id_finish (QmiClientDms *self,
+                               GAsyncResult *res,
+                               GError **error);
+
+void
+qmi_client_dms_get_dev_model_id (QmiClientDms *self,
+                        guint timeout,
+                        GCancellable *cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data);
+
+/*****************************************************************************/
+/* Get Device Revision ID */
+
+QmiDmsGetDevRevIdOutput*
+qmi_client_dms_get_dev_rev_id_finish (QmiClientDms *self,
+                               GAsyncResult *res,
+                               GError **error);
+
+
+void
+qmi_client_dms_get_dev_rev_id (QmiClientDms *self,
+                        guint timeout,
+                        GCancellable *cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data);
+
+/*****************************************************************************/
+/* Get Device Hardware Revision ID */
+
+QmiDmsGetDevHardwareRevIdOutput*
+qmi_client_dms_get_hardware_id_finish (QmiClientDms *self,
+                               GAsyncResult *res,
+                               GError **error);
+
+void
+qmi_client_dms_get_hardware_id (QmiClientDms *self,
+                        guint timeout,
+                        GCancellable *cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data);
+
+/*****************************************************************************/
+/* Get MSISDN/ Voice number */
+
+QmiDmsGetMsisdnOutput*
+qmi_client_dms_get_msisdn_finish (QmiClientDms *self,
+                               GAsyncResult *res,
+                               GError **error);
+
+void
+qmi_client_dms_get_msisdn (QmiClientDms *self,
+                        guint timeout,
+                        GCancellable *cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data);
+
+/*****************************************************************************/
+/* Get SW Version */
+
+void
+qmi_client_dms_get_sw_version (QmiClientDms *self,
+                        guint timeout,
+                        GCancellable *cancellable,
+                        GAsyncReadyCallback callback,
+                        gpointer user_data);
+
+QmiDmsGetSwVersionOutput*
+qmi_client_dms_get_sw_version_finish (QmiClientDms *self,
+                               GAsyncResult *res,
+                               GError **error);
+
+
+
+
 
 G_END_DECLS
 

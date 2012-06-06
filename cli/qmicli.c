@@ -249,6 +249,9 @@ allocate_client_ready (QmiDevice *device,
     case QMI_SERVICE_WDS:
         qmicli_wds_run (device, QMI_CLIENT_WDS (client), cancellable);
         return;
+    case QMI_SERVICE_NAS:
+		qmicli_nas_run (device, QMI_CLIENT_NAS (client), cancellable);
+		return;
     default:
         g_assert_not_reached ();
     }
@@ -341,6 +344,9 @@ int main (int argc, char **argv)
 	                            qmicli_dms_get_option_group ());
 	g_option_context_add_group (context,
 	                            qmicli_wds_get_option_group ());
+	g_option_context_add_group (context,
+		                            qmicli_nas_get_option_group ());
+
     g_option_context_add_main_entries (context, main_entries, NULL);
     g_option_context_parse (context, &argc, &argv, NULL);
 	g_option_context_free (context);
@@ -372,6 +378,10 @@ int main (int argc, char **argv)
     else if (qmicli_wds_options_enabled ()) {
         service = QMI_SERVICE_WDS;
     }
+    /* NAS options? */
+	else if (qmicli_nas_options_enabled ()) {
+		service = QMI_SERVICE_NAS;
+	}
     /* No options? */
     else {
         g_printerr ("error: no actions specified\n");
