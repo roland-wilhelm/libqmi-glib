@@ -76,7 +76,7 @@ QmiNasGetRfBandOutput*			qmi_nas_get_rf_band_output_ref(QmiNasGetRfBandOutput *o
 void							qmi_nas_get_rf_band_output_unref(QmiNasGetRfBandOutput *output);
 const guint8					qmi_nas_get_rf_band_output_get_instances(QmiNasGetRfBandOutput *output);
 const gint8						qmi_nas_get_rf_band_output_get_radio_if(QmiNasGetRfBandOutput *output, guint8 index);
-const gint16					qmi_nas_get_rf_band_output_get_active_band(QmiNasGetRfBandOutput *output, guint8 index);
+const gchar*					qmi_nas_get_rf_band_output_get_active_band(QmiNasGetRfBandOutput *output, guint8 index);
 const gint16					qmi_nas_get_rf_band_output_get_active_channel(QmiNasGetRfBandOutput *output, guint8 index);
 
 /*****************************************************************************/
@@ -93,8 +93,8 @@ const guint16					qmi_nas_get_sys_info_output_get_lac(QmiNasGetSysInfoOutput *ou
 gboolean						qmi_nas_get_sys_info_output_get_cell_id_valid(QmiNasGetSysInfoOutput *output);
 const guint32					qmi_nas_get_sys_info_output_get_cell_id(QmiNasGetSysInfoOutput *output);
 gboolean						qmi_nas_get_sys_info_output_get_network_id_valid(QmiNasGetSysInfoOutput *output);
-const guint32					qmi_nas_get_sys_info_output_get_mcc(QmiNasGetSysInfoOutput *output);
-const guint32					qmi_nas_get_sys_info_output_get_mnc(QmiNasGetSysInfoOutput *output);
+const gchar*					qmi_nas_get_sys_info_output_get_mcc(QmiNasGetSysInfoOutput *output);
+const gchar*					qmi_nas_get_sys_info_output_get_mnc(QmiNasGetSysInfoOutput *output);
 gboolean						qmi_nas_get_sys_info_output_get_tac_valid(QmiNasGetSysInfoOutput *output);
 const guint16					qmi_nas_get_sys_info_output_get_tac(QmiNasGetSysInfoOutput *output);
 

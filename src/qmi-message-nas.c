@@ -13,7 +13,8 @@
 #include "qmi-error-types.h"
 #include "qmi-wds.h"			/* enums of the bearer technology */
 #include "qmi-utils.h"
-
+#include "qmi-band-types.h"
+#include "qmi-mobile-network-code.h"
 #include <string.h>
 
 
@@ -717,21 +718,21 @@ qmi_nas_get_rf_band_output_get_radio_if(QmiNasGetRfBandOutput *output, guint8 in
 }
 
 
-const gint16
+const gchar*
 qmi_nas_get_rf_band_output_get_active_band(QmiNasGetRfBandOutput *output, guint8 index)
 {
 
-    g_return_val_if_fail (output != NULL, 0);
-    g_return_val_if_fail (output->rfBand[index] != NULL, 0);
+    g_return_val_if_fail (output != NULL, NULL);
+    g_return_val_if_fail (output->rfBand[index] != NULL, NULL);
 
     if((index >= 0) || (index < output->instances)) {
 
-		return le16toh(output->rfBand[index]->active_band);
+		return qmi_band_enum_get_string(le16toh(output->rfBand[index]->active_band));
 	}
 	else {
 
 		g_printerr("qmi_nas_get_rf_band_output_get_active_band out of index");
-		return 0;
+		return NULL;
 	}
 
 }
@@ -966,28 +967,28 @@ gboolean qmi_nas_get_sys_info_output_get_network_id_valid(QmiNasGetSysInfoOutput
 
 }
 
-const guint32 qmi_nas_get_sys_info_output_get_mcc(QmiNasGetSysInfoOutput *output) {
+const gchar* qmi_nas_get_sys_info_output_get_mcc(QmiNasGetSysInfoOutput *output) {
 
 	guint value = 0;
 	gchar pString[4];
 
-	g_return_val_if_fail(output != NULL, 0);
+	g_return_val_if_fail(output != NULL, NULL);
 
 	memcpy(pString, output->lteSysInfo.mcc, 3);
 	pString[3] = '\0';
 
 	value = (guint32)g_ascii_strtoull(pString, NULL, 0);
 
-	return value;
+	return qmi_mcc_get_string(value);
 
 }
 
-const guint32 qmi_nas_get_sys_info_output_get_mnc(QmiNasGetSysInfoOutput *output) {
+const gchar* qmi_nas_get_sys_info_output_get_mnc(QmiNasGetSysInfoOutput *output) {
 
 	guint value = 0;
 	gchar pString[4];
 
-	g_return_val_if_fail(output != NULL, 0);
+	g_return_val_if_fail(output != NULL, NULL);
 
 	memcpy(pString, output->lteSysInfo.mnc, 3);
 	pString[3] = '\0';
@@ -998,7 +999,7 @@ const guint32 qmi_nas_get_sys_info_output_get_mnc(QmiNasGetSysInfoOutput *output
 
 	value = (guint32)g_ascii_strtoull(pString, NULL, 0);
 
-	return value;
+	return qmi_mnc_get_string(value);
 
 }
 

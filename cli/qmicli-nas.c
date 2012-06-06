@@ -240,13 +240,15 @@ get_rf_band_ready(QmiClientNas *client,
 		return;
     }
 
+#undef VALIDATE_UNKNOWN
+#define VALIDATE_UNKNOWN(str) (str ? str : "unknown")
 
     g_print("[%s] RF Band Info retrieved:\n", qmi_device_get_path_display(ctx->device));
 
     for(i = 0; i < qmi_nas_get_rf_band_output_get_instances(output); i++) {
 		g_print("--------------------------------------------------------------------\n");
 		g_print("\tRadio interface: '%d'\n", qmi_nas_get_rf_band_output_get_radio_if(output, i));
-		g_print("\tActive Band: '%d'\n", qmi_nas_get_rf_band_output_get_active_band(output, i));
+		g_print("\tActive Band: '%s'\n", VALIDATE_UNKNOWN(qmi_nas_get_rf_band_output_get_active_band(output, i)));
 		g_print("\tActive channel: '%d'\n", qmi_nas_get_rf_band_output_get_active_channel(output, i));
 		g_print("--------------------------------------------------------------------\n");
 
@@ -281,6 +283,8 @@ get_sys_info_ready(QmiClientNas *client,
 		return;
     }
 
+#undef VALIDATE_UNKNOWN
+#define VALIDATE_UNKNOWN(str) (str ? str : "unknown")
 
     g_print("[%s] LTE System Info retrieved:\n", qmi_device_get_path_display(ctx->device));
 	g_print("--------------------------------------------------------------------\n");
@@ -291,8 +295,8 @@ get_sys_info_ready(QmiClientNas *client,
 	g_print("\tCell ID valid: '%d'\n", qmi_nas_get_sys_info_output_get_cell_id_valid(output));
 	g_print("\tCell ID: '%d'\n", qmi_nas_get_sys_info_output_get_cell_id(output));
 	g_print("\tNetwork ID valid: '%d'\n", qmi_nas_get_sys_info_output_get_network_id_valid(output));
-	g_print("\tMobile Country Code: '%d'\n", qmi_nas_get_sys_info_output_get_mcc(output));
-	g_print("\tMobile Network Code: '%d'\n", qmi_nas_get_sys_info_output_get_mnc(output));
+	g_print("\tMobile Country Code: '%s'\n", VALIDATE_UNKNOWN(qmi_nas_get_sys_info_output_get_mcc(output)));
+	g_print("\tMobile Network Code: '%s'\n", VALIDATE_UNKNOWN(qmi_nas_get_sys_info_output_get_mnc(output)));
 	g_print("--------------------------------------------------------------------\n");
 
 
