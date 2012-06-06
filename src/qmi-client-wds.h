@@ -124,6 +124,29 @@ qmi_client_wds_get_dun_call(QmiClientWds *self,
 							GAsyncReadyCallback callback,
 							gpointer user_data);
 
+/*****************************************************************************/
+/* Get current channel rate */
+
+QmiWdsCurrentChannelRateOutput*
+qmi_client_wds_get_current_channel_rate_finish(QmiClientWds *self, GAsyncResult *res, GError **error);
+void
+qmi_client_wds_get_current_channel_rate(QmiClientWds *self,
+							guint timeout,
+							GCancellable *cancellable,
+							GAsyncReadyCallback callback,
+							gpointer user_data);
+
+/*****************************************************************************/
+/* Get PKT Statistics */
+
+QmiWdsPktStatisticsOutput*
+qmi_client_wds_get_pkt_stat_finish(QmiClientWds *self, GAsyncResult *res, GError **error);
+void
+qmi_client_wds_get_pkt_stat(QmiClientWds *self,
+							guint timeout,
+							GCancellable *cancellable,
+							GAsyncReadyCallback callback,
+							gpointer user_data);
 
 
 G_END_DECLS

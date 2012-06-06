@@ -496,7 +496,183 @@ qmi_client_wds_get_dun_call(QmiClientWds *self,
 
 }
 
+/*****************************************************************************/
+/* Get current channel rate */
 
+/**
+ *
+ */
+QmiWdsCurrentChannelRateOutput*
+qmi_client_wds_get_current_channel_rate_finish(QmiClientWds *self, GAsyncResult *res, GError **error)
+{
+
+    if (g_simple_async_result_propagate_error(G_SIMPLE_ASYNC_RESULT(res), error))
+        return NULL;
+
+    return qmi_wds_get_current_channel_rate_output_ref(g_simple_async_result_get_op_res_gpointer(G_SIMPLE_ASYNC_RESULT(res)));
+}
+
+/**
+ *
+ *
+ */
+static void
+get_current_channel_rate_ready(QmiDevice *device,
+               	   GAsyncResult *res,
+               	   GSimpleAsyncResult *simple)
+{
+	QmiWdsCurrentChannelRateOutput *output;
+    GError *error = NULL;
+    QmiMessage *reply;
+
+    reply = qmi_device_command_finish(device, res, &error);
+    if (!reply) {
+        g_prefix_error (&error, "Getting Current Channel rate failed: ");
+        g_simple_async_result_take_error (simple, error);
+        g_simple_async_result_complete (simple);
+        g_object_unref (simple);
+        return;
+    }
+
+    /* Parse reply */
+    output = qmi_message_wds_get_current_channel_rate_reply_parse(reply, &error);
+    if (!output) {
+        g_prefix_error (&error, "Getting Current channel rate reply parsing failed: ");
+        g_simple_async_result_take_error (simple, error);
+    }
+    else
+        g_simple_async_result_set_op_res_gpointer (simple,
+                                                   output,
+                                                   (GDestroyNotify)qmi_wds_get_current_channel_rate_output_unref);
+
+    g_simple_async_result_complete(simple);
+    g_object_unref(simple);
+    qmi_message_unref (reply);
+
+}
+
+/**
+ *
+ *
+ */
+void
+qmi_client_wds_get_current_channel_rate(QmiClientWds *self,
+							guint timeout,
+							GCancellable *cancellable,
+							GAsyncReadyCallback callback,
+							gpointer user_data)
+{
+    GSimpleAsyncResult *result;
+    QmiMessage *request;
+
+
+    result = g_simple_async_result_new(G_OBJECT (self),
+                                        callback,
+                                        user_data,
+                                        qmi_client_wds_get_current_channel_rate);
+
+    request = qmi_message_wds_get_current_channel_rate_new(qmi_client_get_next_transaction_id(QMI_CLIENT (self)),
+                                           	   qmi_client_get_cid (QMI_CLIENT(self)));
+
+    qmi_device_command((QmiDevice *)qmi_client_peek_device(QMI_CLIENT (self)),
+                        request,
+                        timeout,
+                        cancellable,
+                        (GAsyncReadyCallback)get_current_channel_rate_ready,
+                        result);
+
+    qmi_message_unref (request);
+
+}
+
+/*****************************************************************************/
+/* Get PKT Statistics */
+/**
+ *
+ */
+QmiWdsPktStatisticsOutput*
+qmi_client_wds_get_pkt_stat_finish(QmiClientWds *self, GAsyncResult *res, GError **error)
+{
+
+    if (g_simple_async_result_propagate_error(G_SIMPLE_ASYNC_RESULT(res), error))
+        return NULL;
+
+    return qmi_wds_get_pkt_stat_output_ref(g_simple_async_result_get_op_res_gpointer(G_SIMPLE_ASYNC_RESULT(res)));
+}
+
+/**
+ *
+ *
+ */
+static void
+get_pkt_stat_ready(QmiDevice *device,
+               	   GAsyncResult *res,
+               	   GSimpleAsyncResult *simple)
+{
+	QmiWdsPktStatisticsOutput *output;
+    GError *error = NULL;
+    QmiMessage *reply;
+
+    reply = qmi_device_command_finish(device, res, &error);
+    if (!reply) {
+        g_prefix_error (&error, "Getting Packet Statistics failed: ");
+        g_simple_async_result_take_error (simple, error);
+        g_simple_async_result_complete (simple);
+        g_object_unref (simple);
+        return;
+    }
+
+    /* Parse reply */
+    output = qmi_message_wds_get_pkt_stat_reply_parse(reply, &error);
+    if (!output) {
+        g_prefix_error (&error, "Getting Packet Statistics reply parsing failed: ");
+        g_simple_async_result_take_error (simple, error);
+    }
+    else
+        g_simple_async_result_set_op_res_gpointer (simple,
+                                                   output,
+                                                   (GDestroyNotify)qmi_wds_get_pkt_stat_output_unref);
+
+    g_simple_async_result_complete(simple);
+    g_object_unref(simple);
+    qmi_message_unref (reply);
+
+}
+
+/**
+ *
+ *
+ */
+void
+qmi_client_wds_get_pkt_stat(QmiClientWds *self,
+							guint timeout,
+							GCancellable *cancellable,
+							GAsyncReadyCallback callback,
+							gpointer user_data)
+{
+    GSimpleAsyncResult *result;
+    QmiMessage *request;
+    GError *error = NULL;
+
+    result = g_simple_async_result_new(G_OBJECT (self),
+                                        callback,
+                                        user_data,
+                                        qmi_client_wds_get_pkt_stat);
+
+    request = qmi_message_wds_get_pkt_stat_new(qmi_client_get_next_transaction_id(QMI_CLIENT (self)),
+                                           	   qmi_client_get_cid (QMI_CLIENT(self)),
+                                           	   &error);
+
+    qmi_device_command((QmiDevice *)qmi_client_peek_device(QMI_CLIENT (self)),
+                        request,
+                        timeout,
+                        cancellable,
+                        (GAsyncReadyCallback)get_pkt_stat_ready,
+                        result);
+
+    qmi_message_unref (request);
+
+}
 
 static void
 qmi_client_wds_init (QmiClientWds *self)

@@ -1418,9 +1418,9 @@ qmi_message_wds_get_current_data_bearer_technology_reply_parse (QmiMessage *self
 /* Get Dun Call Info */
 
 enum {
-	QMI_WDS_TLV_GET_TX_BYTES_OK	=	0x12,
-	QMI_WDS_TLV_GET_RX_BYTES_OK	=	0x13,
-	QMI_WDS_TLV_GET_CHANNEL_RATE	=	0x16,
+	QMI_WDS_TLV_GET_DUN_TX_BYTES_OK		=	0x12,
+	QMI_WDS_TLV_GET_DUN_RX_BYTES_OK		=	0x13,
+	QMI_WDS_TLV_GET_DUN_CHANNEL_RATE	=	0x16,
 
 };
 
@@ -1513,15 +1513,15 @@ qmi_message_wds_get_dun_call_new(guint8 transaction_id,
     							QMI_WDS_MESSAGE_GET_DUN_CALL_INFO);
 
 
-        if(!qmi_message_tlv_add(message,
-        						QMI_WDS_TLV_SET_REQUEST_INFO,
-                                sizeof(mask),
-                                &mask,
-                                error)) {
-            g_prefix_error (error, "Failed to add Request Info to message: ");
-            qmi_message_unref (message);
-            return NULL;
-        }
+	if(!qmi_message_tlv_add(message,
+							QMI_WDS_TLV_SET_REQUEST_INFO,
+							sizeof(mask),
+							&mask,
+							error)) {
+		g_prefix_error(error, "Failed to add Request Info to message: ");
+		qmi_message_unref (message);
+		return NULL;
+	}
 
 
 
@@ -1587,25 +1587,457 @@ qmi_message_wds_get_dun_call_reply_parse (QmiMessage *self,
         /* Otherwise, build output */
     }
 
+    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
 
+    output = g_slice_new0(QmiWdsDunCallOutput);
+    output->ref_count = 1;
+    output->error = inner_error;
 
-    qmi_message_tlv_get(self,
-						QMI_WDS_TLV_GET_TX_BYTES_OK,
-						sizeof(output->bytes_ok.tx_bytes_ok),
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_DUN_TX_BYTES_OK,
+						sizeof(guint64),
 						&output->bytes_ok.tx_bytes_ok,
-						NULL);
+						error)) {
+    	g_prefix_error (error, "Couldn't get the TLV Tx bytes ok: ");
 
-    qmi_message_tlv_get(self,
-						QMI_WDS_TLV_GET_RX_BYTES_OK,
-						sizeof(output->bytes_ok.rx_bytes_ok),
+    }
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_DUN_RX_BYTES_OK,
+						sizeof(guint64),
 						&output->bytes_ok.rx_bytes_ok,
-						NULL);
+						error)) {
+    	g_prefix_error (error, "Couldn't get the TLV Rx bytes ok: ");
 
-    qmi_message_tlv_get(self,
-    					QMI_WDS_TLV_GET_CHANNEL_RATE,
-						sizeof(output->channel_rate),
+    }
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_DUN_CHANNEL_RATE,
+						sizeof(struct _QmiWdsChannelRate),
 						&output->channel_rate,
-						NULL);
+						error)) {
+    	g_prefix_error (error, "Couldn't get the TLV channel rate: ");
+
+    }
 
     return output;
 }
+
+
+
+/*****************************************************************************/
+/* Get Current Channel Rate */
+
+enum {
+	QMI_WDS_TLV_GET_CHANNEL_RATE	=	0x01,
+
+};
+
+
+
+struct _QmiWdsCurrentChannelRateOutput {
+	volatile gint ref_count;
+	GError *error;
+	struct _QmiWdsChannelRate channel_rate;
+
+};
+
+
+const guint32
+qmi_wds_get_current_channel_rate_output_get_current_channel_rx_rate(QmiWdsCurrentChannelRateOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->channel_rate.current_channel_rx_rate);
+}
+
+const guint32
+qmi_wds_get_current_channel_rate_output_get_current_channel_tx_rate(QmiWdsCurrentChannelRateOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->channel_rate.current_channel_tx_rate);
+}
+
+const guint32
+qmi_wds_get_current_channel_rate_output_get_max_channel_tx_rate(QmiWdsCurrentChannelRateOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->channel_rate.max_channel_tx_rate);
+}
+
+const guint32
+qmi_wds_get_current_channel_rate_output_get_max_channel_rx_rate(QmiWdsCurrentChannelRateOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->channel_rate.max_channel_rx_rate);
+}
+
+QmiMessage*
+qmi_message_wds_get_current_channel_rate_new(guint8 transaction_id,
+                                   guint8 client_id)
+{
+    QmiMessage *message;
+
+
+    message = qmi_message_new(QMI_SERVICE_WDS,
+    							client_id,
+    							transaction_id,
+    							QMI_WDS_MESSAGE_GET_CURRENT_CHANNEL_RATE);
+
+
+    return message;
+}
+
+gboolean
+qmi_wds_get_current_channel_rate_output_get_result (QmiWdsCurrentChannelRateOutput *output,
+                                         GError **error)
+{
+    g_return_val_if_fail (output != NULL, FALSE);
+
+    if (output->error) {
+        if (error)
+            *error = g_error_copy (output->error);
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+QmiWdsCurrentChannelRateOutput*
+qmi_wds_get_current_channel_rate_output_ref (QmiWdsCurrentChannelRateOutput *output)
+{
+    g_return_val_if_fail (output != NULL, NULL);
+
+    g_atomic_int_inc (&output->ref_count);
+    return output;
+}
+
+
+void
+qmi_wds_get_current_channel_rate_output_unref (QmiWdsCurrentChannelRateOutput *output)
+{
+    g_return_if_fail (output != NULL);
+
+    if (g_atomic_int_dec_and_test (&output->ref_count)) {
+        if (output->error)
+            g_error_free (output->error);
+        g_slice_free (QmiWdsCurrentChannelRateOutput, output);
+    }
+}
+
+QmiWdsCurrentChannelRateOutput*
+qmi_message_wds_get_current_channel_rate_reply_parse (QmiMessage *self,
+                                           GError **error)
+{
+	QmiWdsCurrentChannelRateOutput *output;
+    GError *inner_error = NULL;
+
+
+    g_assert (qmi_message_get_message_id (self) == QMI_WDS_MESSAGE_GET_CURRENT_CHANNEL_RATE);
+
+    if (!qmi_message_get_response_result (self, &inner_error)) {
+        /* Only QMI protocol errors are set in the Output result, all the
+         * others (e.g. failures parsing) are directly propagated to error. */
+        if (inner_error->domain != QMI_PROTOCOL_ERROR) {
+            g_propagate_error (error, inner_error);
+            return NULL;
+        }
+
+        /* Otherwise, build output */
+    }
+
+    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
+
+    output = g_slice_new0(QmiWdsCurrentChannelRateOutput);
+    output->ref_count = 1;
+    output->error = inner_error;
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_CHANNEL_RATE,
+						sizeof(struct _QmiWdsChannelRate),
+						&output->channel_rate,
+						error)) {
+    	g_prefix_error (error, "Couldn't get the LTE Signal Strength TLV: ");
+    	qmi_wds_get_current_channel_rate_output_unref(output);
+    	return NULL;
+
+    }
+
+
+    return output;
+}
+
+/*****************************************************************************/
+/* Get PKT Statistics */
+
+enum {
+	QMI_WDS_TLV_PKT_STATISTICS_MASK	=	0x01
+};
+
+enum {
+	QMI_WDS_TLV_GET_TX_PKT_OK		=	0x10,
+	QMI_WDS_TLV_GET_RX_PKT_OK		=	0x11,
+	QMI_WDS_TLV_GET_TX_PKT_ERRORS	=	0x12,
+	QMI_WDS_TLV_GET_RX_PKT_ERRORS	=	0x13,
+	QMI_WDS_TLV_GET_TX_OVERFLOWS	=	0x14,
+	QMI_WDS_TLV_GET_RX_OVERFLOWS	=	0x15,
+	QMI_WDS_TLV_GET_TX_BYTES_OK		=	0x19,
+	QMI_WDS_TLV_GET_RX_BYTES_OK		=	0x1A
+
+};
+
+
+struct _PktStatistics {
+	guint32	tx_ok_pkt;
+	guint32 rx_ok_pkt;
+	guint32 tx_err_pkt;
+	guint32 rx_err_pkt;
+	guint32 tx_ofl_pkt;
+	guint32 rx_ofl_pkt;
+	guint64 tx_bytes_ok;
+	guint64 rx_bytes_ok;
+
+};
+
+struct _QmiWdsPktStatisticsOutput {
+	volatile gint ref_count;
+	GError *error;
+	struct _PktStatistics pkt_stat;
+
+};
+
+
+const guint32
+qmi_wds_get_pkt_stat_output_get_tx_ok_pkt(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->pkt_stat.tx_ok_pkt);
+}
+
+const guint32
+qmi_wds_get_pkt_stat_output_get_rx_ok_pkt(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->pkt_stat.rx_ok_pkt);
+}
+
+const guint32
+qmi_wds_get_pkt_stat_output_get_tx_err_pkt(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->pkt_stat.tx_err_pkt);
+}
+
+const guint32
+qmi_wds_get_pkt_stat_output_get_rx_err_pkt(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->pkt_stat.rx_err_pkt);
+}
+
+const guint32
+qmi_wds_get_pkt_stat_output_get_tx_ofl_pkt(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->pkt_stat.tx_ofl_pkt);
+}
+
+const guint32
+qmi_wds_get_pkt_stat_output_get_rx_ofl_pkt(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le32toh(output->pkt_stat.rx_ofl_pkt);
+}
+
+const guint64
+qmi_wds_get_pkt_stat_output_get_tx_bytes_ok(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le64toh(output->pkt_stat.tx_bytes_ok);
+}
+
+const guint64
+qmi_wds_get_pkt_stat_output_get_rx_bytes_ok(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, 0);
+
+    return le64toh(output->pkt_stat.rx_bytes_ok);
+}
+
+QmiMessage*
+qmi_message_wds_get_pkt_stat_new(guint8 transaction_id,
+                                 guint8 client_id,
+                                 GError **error)
+{
+    QmiMessage *message;
+    guint32 mask = 0;
+    mask |= (1<<0);		/* Tx packets ok */
+    mask |= (1<<1);		/* Rx packet ok */
+    mask |= (1<<2);		/* Tx packet error */
+    mask |= (1<<3);		/* Rx packet error */
+    mask |= (1<<4);		/* Tx packet overflows */
+    mask |= (1<<5);		/* Rx packet overflows */
+    mask |= (1<<6);		/* Tx bytes ok */
+    mask |= (1<<7);		/* Rx bytes ok */
+
+    message = qmi_message_new(QMI_SERVICE_WDS,
+    							client_id,
+    							transaction_id,
+    							QMI_WDS_MESSAGE_GET_PKT_STATISTICS);
+
+    if(!qmi_message_tlv_add(message,
+    						QMI_WDS_TLV_PKT_STATISTICS_MASK,
+							sizeof(mask),
+							&mask,
+							error)) {
+
+		g_prefix_error(error, "Failed to add Request Info to message: ");
+		qmi_message_unref (message);
+		return NULL;
+	}
+
+
+    return message;
+}
+
+gboolean
+qmi_wds_get_pkt_stat_output_get_result(QmiWdsPktStatisticsOutput *output,
+                                         GError **error)
+{
+    g_return_val_if_fail (output != NULL, FALSE);
+
+    if (output->error) {
+        if (error)
+            *error = g_error_copy (output->error);
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+QmiWdsPktStatisticsOutput*
+qmi_wds_get_pkt_stat_output_ref(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_val_if_fail (output != NULL, NULL);
+
+    g_atomic_int_inc (&output->ref_count);
+    return output;
+}
+
+
+void
+qmi_wds_get_pkt_stat_output_unref(QmiWdsPktStatisticsOutput *output)
+{
+    g_return_if_fail (output != NULL);
+
+    if (g_atomic_int_dec_and_test (&output->ref_count)) {
+        if (output->error)
+            g_error_free (output->error);
+        g_slice_free (QmiWdsPktStatisticsOutput, output);
+    }
+}
+
+QmiWdsPktStatisticsOutput*
+qmi_message_wds_get_pkt_stat_reply_parse (QmiMessage *self,
+                                           GError **error)
+{
+	QmiWdsPktStatisticsOutput *output;
+    GError *inner_error = NULL;
+
+
+    g_assert (qmi_message_get_message_id (self) == QMI_WDS_MESSAGE_GET_PKT_STATISTICS);
+
+    if (!qmi_message_get_response_result (self, &inner_error)) {
+        /* Only QMI protocol errors are set in the Output result, all the
+         * others (e.g. failures parsing) are directly propagated to error. */
+        if (inner_error->domain != QMI_PROTOCOL_ERROR) {
+            g_propagate_error (error, inner_error);
+            return NULL;
+        }
+
+        /* Otherwise, build output */
+    }
+
+    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
+
+    output = g_slice_new0(QmiWdsPktStatisticsOutput);
+    output->ref_count = 1;
+    output->error = inner_error;
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_TX_PKT_OK,
+						sizeof(output->pkt_stat.tx_ok_pkt),
+						&output->pkt_stat.tx_ok_pkt,
+						error)) {
+    	g_prefix_error (error, "Couldn't get the Tx Packet OK TLV: ");
+
+    }
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_RX_PKT_OK,
+    						sizeof(output->pkt_stat.rx_ok_pkt),
+    						&output->pkt_stat.rx_ok_pkt,
+    						error)) {
+		g_prefix_error (error, "Couldn't get the Rx Packet OK TLV: ");
+
+	}
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_TX_PKT_ERRORS,
+        						sizeof(output->pkt_stat.tx_err_pkt),
+        						&output->pkt_stat.tx_err_pkt,
+        						error)) {
+		g_prefix_error (error, "Couldn't get the Tx Packet Error TLV: ");
+
+	}
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_RX_PKT_ERRORS,
+            						sizeof(output->pkt_stat.rx_err_pkt),
+            						&output->pkt_stat.rx_err_pkt,
+            						error)) {
+		g_prefix_error (error, "Couldn't get the Rx Packet Error TLV: ");
+
+	}
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_TX_OVERFLOWS,
+               						sizeof(output->pkt_stat.tx_ofl_pkt),
+               						&output->pkt_stat.tx_ofl_pkt,
+               						error)) {
+		g_prefix_error (error, "Couldn't get the Tx Packet Overflows TLV: ");
+
+	}
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_RX_OVERFLOWS,
+                   						sizeof(output->pkt_stat.rx_ofl_pkt),
+                   						&output->pkt_stat.rx_ofl_pkt,
+                   						error)) {
+		g_prefix_error (error, "Couldn't get the Rx Packet Overflows TLV: ");
+
+	}
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_TX_BYTES_OK,
+                       						sizeof(output->pkt_stat.tx_bytes_ok),
+                       						&output->pkt_stat.tx_bytes_ok,
+                       						error)) {
+		g_prefix_error (error, "Couldn't get the Tx Bytes OK TLV: ");
+
+	}
+
+    if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_RX_BYTES_OK,
+                           						sizeof(output->pkt_stat.rx_bytes_ok),
+                           						&output->pkt_stat.rx_bytes_ok,
+                           						error)) {
+		g_prefix_error (error, "Couldn't get the Rx Bytes OK TLV: ");
+
+	}
+
+    return output;
+}
+

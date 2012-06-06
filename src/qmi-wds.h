@@ -31,13 +31,15 @@ G_BEGIN_DECLS
 /*****************************************************************************/
 /* Supported/known messages */
 typedef enum {
-  QMI_WDS_MESSAGE_EVENT         = 0x0001, /* unused currently */
-  QMI_WDS_MESSAGE_START_NETWORK = 0x0020,
-  QMI_WDS_MESSAGE_STOP_NETWORK  = 0x0021,
-  QMI_WDS_MESSAGE_GET_PACKET_SERVICE_STATUS  = 0x0022,
-  QMI_WDS_MESSAGE_GET_DATA_BEARER_TECHNOLOGY = 0x0037,
-  QMI_WDS_MESSAGE_GET_DUN_CALL_INFO	=	0x0038,
-  QMI_WDS_MESSAGE_GET_CURRENT_DATA_BEARER_TECHNOLOGY = 0x0044
+  QMI_WDS_MESSAGE_EVENT         						= 	0x0001, /* unused currently */
+  QMI_WDS_MESSAGE_START_NETWORK 						= 	0x0020,
+  QMI_WDS_MESSAGE_STOP_NETWORK  						= 	0x0021,
+  QMI_WDS_MESSAGE_GET_PACKET_SERVICE_STATUS  			= 	0x0022,
+  QMI_WDS_MESSAGE_GET_CURRENT_CHANNEL_RATE				=	0x0023,
+  QMI_WDS_MESSAGE_GET_PKT_STATISTICS					=	0x0024,
+  QMI_WDS_MESSAGE_GET_DATA_BEARER_TECHNOLOGY 			= 	0x0037,
+  QMI_WDS_MESSAGE_GET_DUN_CALL_INFO						=	0x0038,
+  QMI_WDS_MESSAGE_GET_CURRENT_DATA_BEARER_TECHNOLOGY 	= 	0x0044
 } QmiWdsMessage;
 
 /*****************************************************************************/
@@ -226,6 +228,58 @@ const guint32
 qmi_wds_get_dun_call_output_get_max_channel_tx_rate(QmiWdsDunCallOutput *output);
 const guint32
 qmi_wds_get_dun_call_output_get_max_channel_rx_rate(QmiWdsDunCallOutput *output);
+
+/*****************************************************************************/
+/* Get current channel rate */
+
+typedef struct _QmiWdsCurrentChannelRateOutput QmiWdsCurrentChannelRateOutput;
+
+void
+qmi_wds_get_current_channel_rate_output_unref (QmiWdsCurrentChannelRateOutput *output);
+QmiWdsCurrentChannelRateOutput*
+qmi_wds_get_current_channel_rate_output_ref (QmiWdsCurrentChannelRateOutput *output);
+gboolean
+qmi_wds_get_current_channel_rate_output_get_result (QmiWdsCurrentChannelRateOutput *output,
+                                         GError **error);
+
+const guint32
+qmi_wds_get_current_channel_rate_output_get_current_channel_rx_rate(QmiWdsCurrentChannelRateOutput *output);
+const guint32
+qmi_wds_get_current_channel_rate_output_get_current_channel_tx_rate(QmiWdsCurrentChannelRateOutput *output);
+const guint32
+qmi_wds_get_current_channel_rate_output_get_max_channel_tx_rate(QmiWdsCurrentChannelRateOutput *output);
+const guint32
+qmi_wds_get_current_channel_rate_output_get_max_channel_rx_rate(QmiWdsCurrentChannelRateOutput *output);
+
+/*****************************************************************************/
+/* Get PKT Statistics */
+
+typedef struct _QmiWdsPktStatisticsOutput QmiWdsPktStatisticsOutput;
+
+gboolean
+qmi_wds_get_pkt_stat_output_get_result(QmiWdsPktStatisticsOutput *output,
+                                         GError **error);
+QmiWdsPktStatisticsOutput*
+qmi_wds_get_pkt_stat_output_ref(QmiWdsPktStatisticsOutput *output);
+void
+qmi_wds_get_pkt_stat_output_unref(QmiWdsPktStatisticsOutput *output);
+
+const guint32
+qmi_wds_get_pkt_stat_output_get_tx_ok_pkt(QmiWdsPktStatisticsOutput *output);
+const guint32
+qmi_wds_get_pkt_stat_output_get_rx_ok_pkt(QmiWdsPktStatisticsOutput *output);
+const guint32
+qmi_wds_get_pkt_stat_output_get_tx_err_pkt(QmiWdsPktStatisticsOutput *output);
+const guint32
+qmi_wds_get_pkt_stat_output_get_rx_err_pkt(QmiWdsPktStatisticsOutput *output);
+const guint32
+qmi_wds_get_pkt_stat_output_get_tx_ofl_pkt(QmiWdsPktStatisticsOutput *output);
+const guint32
+qmi_wds_get_pkt_stat_output_get_rx_ofl_pkt(QmiWdsPktStatisticsOutput *output);
+const guint64
+qmi_wds_get_pkt_stat_output_get_tx_bytes_ok(QmiWdsPktStatisticsOutput *output);
+const guint64
+qmi_wds_get_pkt_stat_output_get_rx_bytes_ok(QmiWdsPktStatisticsOutput *output);
 
 
 

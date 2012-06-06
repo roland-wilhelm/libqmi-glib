@@ -53,7 +53,9 @@ static gboolean get_packet_service_status_flag;
 static gboolean get_data_bearer_technology_flag;
 static gboolean get_current_data_bearer_technology_flag;
 static gboolean get_dun_call_flag;
+static gboolean get_current_channel_rate_flag;
 static gboolean noop_flag;
+static gboolean get_pkt_stat_flag;
 
 static GOptionEntry entries[] = {
     { "wds-start-network", 0, 0, G_OPTION_ARG_NONE, &start_network_flag,
@@ -80,8 +82,16 @@ static GOptionEntry entries[] = {
       "Get current data bearer technology",
       NULL
     },
-    { "wds-get-dun_call", 0, 0, G_OPTION_ARG_NONE, &get_dun_call_flag,
+    { "wds-get-dun-call", 0, 0, G_OPTION_ARG_NONE, &get_dun_call_flag,
 	  "Rx/Tx bytes ok, channel rate",
+	  NULL
+	},
+	{ "wds-get-current-channel-rate", 0, 0, G_OPTION_ARG_NONE, &get_current_channel_rate_flag,
+	  "Channel rate",
+	  NULL
+	},
+	{ "wds-get-pkt-stat", 0, 0, G_OPTION_ARG_NONE, &get_pkt_stat_flag,
+	  "Packet Statistics",
 	  NULL
 	},
     { "wds-noop", 0, 0, G_OPTION_ARG_NONE, &noop_flag,
@@ -121,7 +131,9 @@ qmicli_wds_options_enabled (void)
                  get_data_bearer_technology_flag +
                  get_current_data_bearer_technology_flag +
                  noop_flag+
-                 get_dun_call_flag);
+                 get_dun_call_flag+
+                 get_current_channel_rate_flag+
+                 get_pkt_stat_flag);
 
     if (n_actions > 1) {
         g_printerr ("error: too many WDS actions requested\n");
@@ -579,6 +591,76 @@ get_dun_call_ready(QmiClientWds *client, GAsyncResult *res)
     shutdown(TRUE);
 }
 
+static void
+get_current_channel_rate_ready(QmiClientWds *client, GAsyncResult *res)
+{
+    GError *error = NULL;
+    QmiWdsCurrentChannelRateOutput *output;
+
+    output = qmi_client_wds_get_current_channel_rate_finish(client, res, &error);
+    if(!output) {
+        g_printerr("error: operation failed: %s\n",
+                  error->message);
+        g_error_free(error);
+        shutdown (FALSE);
+        return;
+    }
+
+    if(!qmi_wds_get_current_channel_rate_output_get_result(output, &error)) {
+        g_printerr("error: couldn't get current channel rate: %s\n", error->message);
+        g_error_free(error);
+        qmi_wds_get_current_channel_rate_output_unref(output);
+        shutdown(FALSE);
+        return;
+    }
+
+    g_print("[%s] Dun call info retrieved:\n", qmi_device_get_path_display(ctx->device));
+    g_print("\tTx current channel rate: %u\n", qmi_wds_get_current_channel_rate_output_get_current_channel_tx_rate(output));
+    g_print("\tRx current channel rate: %u\n", qmi_wds_get_current_channel_rate_output_get_current_channel_rx_rate(output));
+    g_print("\tTx max. channel rate: %u\n", qmi_wds_get_current_channel_rate_output_get_max_channel_tx_rate(output));
+    g_print("\tRx max. channel rate: %u\n", qmi_wds_get_current_channel_rate_output_get_max_channel_rx_rate(output));
+
+    qmi_wds_get_current_channel_rate_output_unref(output);
+    shutdown(TRUE);
+}
+
+static void
+get_pkt_stat_ready(QmiClientWds *client, GAsyncResult *res)
+{
+    GError *error = NULL;
+    QmiWdsPktStatisticsOutput *output;
+
+    output = qmi_client_wds_get_pkt_stat_finish(client, res, &error);
+    if(!output) {
+        g_printerr("error: operation failed: %s\n",
+                  error->message);
+        g_error_free(error);
+        shutdown (FALSE);
+        return;
+    }
+
+    if(!qmi_wds_get_pkt_stat_output_get_result(output, &error)) {
+        g_printerr("error: couldn't get Packet Statistics: %s\n", error->message);
+        g_error_free(error);
+        qmi_wds_get_pkt_stat_output_unref(output);
+        shutdown(FALSE);
+        return;
+    }
+
+    g_print("[%s] Packet statistics retrieved:\n", qmi_device_get_path_display(ctx->device));
+    g_print("\tTx packet ok: %u\n", qmi_wds_get_pkt_stat_output_get_tx_ok_pkt(output));
+    g_print("\tRx packet ok: %u\n", qmi_wds_get_pkt_stat_output_get_rx_ok_pkt(output));
+    g_print("\tTx packet error: %u\n", qmi_wds_get_pkt_stat_output_get_tx_err_pkt(output));
+    g_print("\tRx packet error: %u\n", qmi_wds_get_pkt_stat_output_get_rx_err_pkt(output));
+    g_print("\tTx packet overflow: %u\n", qmi_wds_get_pkt_stat_output_get_tx_ofl_pkt(output));
+    g_print("\tRx packet overflow: %u\n", qmi_wds_get_pkt_stat_output_get_rx_ofl_pkt(output));
+    g_print("\tTx bytes ok: %llu\n", qmi_wds_get_pkt_stat_output_get_tx_bytes_ok(output));
+    g_print("\tRx bytes ok: %llu\n", qmi_wds_get_pkt_stat_output_get_rx_bytes_ok(output));
+
+    qmi_wds_get_pkt_stat_output_unref(output);
+    shutdown(TRUE);
+}
+
 
 static gboolean
 noop_cb (gpointer unused)
@@ -676,6 +758,28 @@ qmicli_wds_run (QmiDevice *device,
 									NULL);
 	   return;
    }
+
+   /* Request to get current channel rate? */
+  if (get_current_channel_rate_flag) {
+	   g_debug ("Asynchronously getting current channel rate...");
+	   qmi_client_wds_get_current_channel_rate(ctx->client,
+									10,
+									ctx->cancellable,
+									(GAsyncReadyCallback)get_current_channel_rate_ready,
+									NULL);
+	   return;
+  }
+
+  /* Request to get packet statistics? */
+    if (get_pkt_stat_flag) {
+  	   g_debug ("Asynchronously getting packet statistics...");
+  	   qmi_client_wds_get_pkt_stat(ctx->client,
+  									10,
+  									ctx->cancellable,
+  									(GAsyncReadyCallback)get_pkt_stat_ready,
+  									NULL);
+  	   return;
+    }
 
     /* Just client allocate/release? */
     if (noop_flag) {

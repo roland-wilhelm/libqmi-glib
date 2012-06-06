@@ -51,7 +51,7 @@ static GOptionEntry entries[] = {
 	  "Get RF Band Information",
 	  NULL
 	},
-	{ "nas-get-sys_info", 0, 0, G_OPTION_ARG_NONE, &get_sys_info_flag,
+	{ "nas-get-sys-info", 0, 0, G_OPTION_ARG_NONE, &get_sys_info_flag,
 	  "",
 	  NULL
 	},
@@ -353,9 +353,9 @@ qmicli_nas_run(QmiDevice *device, QmiClientNas *client, GCancellable *cancellabl
 		return;
 	}
 	/* Request to get System Information? */
-	if (get_rf_band_flag) {
+	if (get_sys_info_flag) {
 		g_debug ("Asynchronously getting System Info...");
-		qmi_client_nas_get_rf_band(ctx->client,
+		qmi_client_nas_get_sys_info(ctx->client,
 									10,
 									ctx->cancellable,
 									(GAsyncReadyCallback)get_sys_info_ready,

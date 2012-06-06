@@ -32,5 +32,7 @@
 #include "qmi-client-dms.h"
 #include "qmi-client-wds.h"
 #include "qmi-client-nas.h"
+#include "qmi-band-types.h"
+#include "qmi-mobile-network-code.h"
 
 #endif /* _LIBQMI_GLIB_H_ */

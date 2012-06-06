@@ -79,6 +79,26 @@ QmiWdsGetCurrentDataBearerTechnologyOutput *qmi_message_wds_get_current_data_bea
 QmiMessage*				qmi_message_wds_get_dun_call_new         (guint8 transaction_id, guint8 client_id, GError **error);
 QmiWdsDunCallOutput*	qmi_message_wds_get_dun_call_reply_parse (QmiMessage *self, GError **error);
 
+/*****************************************************************************/
+/* Get current channel rate */
+
+QmiMessage*
+qmi_message_wds_get_current_channel_rate_new(guint8 transaction_id,
+                                   guint8 client_id);
+QmiWdsCurrentChannelRateOutput*
+qmi_message_wds_get_current_channel_rate_reply_parse (QmiMessage *self,
+                                           GError **error);
+
+/*****************************************************************************/
+/* Get PKT Statistics */
+
+QmiWdsPktStatisticsOutput*
+qmi_message_wds_get_pkt_stat_reply_parse (QmiMessage *self,
+                                           GError **error);
+QmiMessage*
+qmi_message_wds_get_pkt_stat_new(guint8 transaction_id,
+                                 guint8 client_id,
+                                 GError **error);
 
 G_END_DECLS
 

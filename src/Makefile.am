@@ -44,6 +44,7 @@ qmi-client-ctl.c: qmi-error-types.h qmi-enum-types.h
 qmi-message.c: qmi-error-types.h qmi-enum-types.h
 qmi-message-ctl.c: qmi-error-types.h
 qmi-message-dms.c: qmi-error-types.h
+qmi-message-nas.c: qmi-band-types.h qmi-mobile-network-code.h
 
 libqmi_glib_la_SOURCES = \
 	libqmi-glib.h \
@@ -60,7 +61,9 @@ libqmi_glib_la_SOURCES = \
 	qmi-ctl.h qmi-client-ctl.h qmi-client-ctl.c \
 	qmi-dms.h qmi-client-dms.h qmi-client-dms.c \
 	qmi-wds.h qmi-client-wds.h qmi-client-wds.c \
-	qmi-nas.h qmi-client-nas.h qmi-client-nas.c
+	qmi-nas.h qmi-client-nas.h qmi-client-nas.c \
+	qmi-band-types.h qmi-band-types.c \
+	qmi-mobile-network-code.h qmi-mobile-network-code.c
 
 libqmi_glib_la_LIBADD = \
 	$(LIBQMI_GLIB_LIBS)
@@ -74,4 +77,6 @@ include_HEADERS = \
 	qmi-client.h \
 	qmi-dms.h qmi-client-dms.h \
 	qmi-wds.h qmi-client-wds.h \
-	qmi-nas.h qmi-client-nas.h
+	qmi-nas.h qmi-client-nas.h \
+	qmi-band-types.h
+	qmi-mobile-network-code.h
