@@ -1,6 +1,7 @@
 *~
 *.o
 *.lo
+*.project
 
 ChangeLog
 INSTALL
@@ -26,7 +27,7 @@ m4
 missing
 stamp-h1
 depcomp
-
+Debug/
 src/.libs
 src/.deps
 src/Makefile
