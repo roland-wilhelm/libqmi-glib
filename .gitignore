@@ -26,6 +26,7 @@ m4
 missing
 stamp-h1
 depcomp
+.metadata/
 
 src/.libs
 src/.deps
