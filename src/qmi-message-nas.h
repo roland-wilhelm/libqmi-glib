@@ -43,7 +43,10 @@ QmiNasGetRfBandOutput*				qmi_message_nas_get_rf_band_reply_parse (QmiMessage *s
 QmiMessage*							qmi_message_nas_get_sys_info_new         (guint8 transaction_id, guint8 client_id);
 QmiNasGetSysInfoOutput*				qmi_message_nas_get_sys_info_reply_parse (QmiMessage *self, GError **error);
 
-
+/*****************************************************************************/
+/* Get Get Signal Strength */
+QmiMessage*							qmi_message_nas_get_sig_strength_new         (guint8 transaction_id, guint8 client_id, GError **error);
+QmiNasGetSigStrengthOutput*				qmi_message_nas_get_sig_strength_reply_parse (QmiMessage *self, GError **error);
 
 G_END_DECLS
 

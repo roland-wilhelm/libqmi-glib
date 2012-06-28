@@ -372,6 +372,95 @@ qmi_client_nas_get_sys_info(QmiClientNas *self,
 
 }
 
+/*****************************************************************************/
+/* Get Signal Strength */
+
+/**
+ *
+ */
+QmiNasGetSigStrengthOutput*
+qmi_client_nas_get_sig_strength_finish(QmiClientNas *self, GAsyncResult *res, GError **error)
+{
+
+    if (g_simple_async_result_propagate_error(G_SIMPLE_ASYNC_RESULT(res), error))
+        return NULL;
+
+    return qmi_nas_get_sig_strength_output_ref(g_simple_async_result_get_op_res_gpointer(G_SIMPLE_ASYNC_RESULT(res)));
+}
+
+/**
+ *
+ *
+ */
+static void
+get_sig_strength_ready(QmiDevice *device,
+               	   GAsyncResult *res,
+               	   GSimpleAsyncResult *simple)
+{
+	QmiNasGetSigStrengthOutput *output;
+    GError *error = NULL;
+    QmiMessage *reply;
+
+    reply = qmi_device_command_finish(device, res, &error);
+    if (!reply) {
+        g_prefix_error (&error, "Getting Signal Strength failed: ");
+        g_simple_async_result_take_error (simple, error);
+        g_simple_async_result_complete (simple);
+        g_object_unref (simple);
+        return;
+    }
+
+    /* Parse reply */
+    output = qmi_message_nas_get_sig_strength_reply_parse(reply, &error);
+    if (!output) {
+        g_prefix_error (&error, "Getting Signal Strength reply parsing failed: ");
+        g_simple_async_result_take_error (simple, error);
+    }
+    else
+        g_simple_async_result_set_op_res_gpointer (simple,
+                                                   output,
+                                                   (GDestroyNotify)qmi_nas_get_sig_strength_output_unref);
+
+    g_simple_async_result_complete(simple);
+    g_object_unref(simple);
+    qmi_message_unref (reply);
+
+}
+
+/**
+ *
+ *
+ */
+void
+qmi_client_nas_get_sig_strength(QmiClientNas *self,
+							guint timeout,
+							GCancellable *cancellable,
+							GAsyncReadyCallback callback,
+							gpointer user_data)
+{
+    GSimpleAsyncResult *result;
+    QmiMessage *request;
+    GError *error = NULL;
+
+    result = g_simple_async_result_new(G_OBJECT (self),
+                                        callback,
+                                        user_data,
+                                        qmi_client_nas_get_sig_strength);
+
+    request = qmi_message_nas_get_sig_strength_new(qmi_client_get_next_transaction_id(QMI_CLIENT (self)),
+                                           	   qmi_client_get_cid (QMI_CLIENT(self)), &error);
+
+    qmi_device_command((QmiDevice *)qmi_client_peek_device(QMI_CLIENT (self)),
+                        request,
+                        timeout,
+                        cancellable,
+                        (GAsyncReadyCallback)get_sig_strength_ready,
+                        result);
+
+    qmi_message_unref (request);
+
+}
+
 
 
 

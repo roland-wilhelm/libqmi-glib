@@ -84,6 +84,19 @@ qmi_client_nas_get_sys_info(QmiClientNas *self,
 							GAsyncReadyCallback callback,
 							gpointer user_data);
 
+/*****************************************************************************/
+/* Get Signal Strength */
+
+QmiNasGetSigStrengthOutput*
+qmi_client_nas_get_sig_strength_finish(QmiClientNas *self, GAsyncResult *res, GError **error);
+
+void
+qmi_client_nas_get_sig_strength(QmiClientNas *self,
+							guint timeout,
+							GCancellable *cancellable,
+							GAsyncReadyCallback callback,
+							gpointer user_data);
+
 
 
 G_END_DECLS

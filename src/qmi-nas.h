@@ -99,6 +99,26 @@ gboolean						qmi_nas_get_sys_info_output_get_tac_valid(QmiNasGetSysInfoOutput *
 const guint16					qmi_nas_get_sys_info_output_get_tac(QmiNasGetSysInfoOutput *output);
 
 
+/*****************************************************************************/
+/* Get Signal Strength */
+typedef struct _QmiNasGetSigStrengthOutput QmiNasGetSigStrengthOutput;
+
+QmiNasGetSigStrengthOutput*
+qmi_nas_get_sig_strength_output_ref(QmiNasGetSigStrengthOutput *output);
+
+void
+qmi_nas_get_sig_strength_output_unref(QmiNasGetSigStrengthOutput *output);
+
+gboolean
+qmi_nas_get_sig_strength_output_get_result(QmiNasGetSigStrengthOutput *output, GError **error);
+const guint16 qmi_nas_get_sig_strength_output_get_rsrp(QmiNasGetSigStrengthOutput *output);
+const guint16  qmi_nas_get_sig_strength_output_get_snr(QmiNasGetSigStrengthOutput *output);
+const guint8 qmi_nas_get_sig_strength_output_get_radio_if(QmiNasGetSigStrengthOutput *output);
+const guint8 qmi_nas_get_sig_strength_output_get_rsrq(QmiNasGetSigStrengthOutput *output);
+
+
+
+
 
 G_END_DECLS
 

@@ -41,5 +41,7 @@ src/qmi-enum-types.c
 cli/.deps
 cli/.libs
 cli/qmicli
+cli/qmi
+cli/test
 
 Debug/

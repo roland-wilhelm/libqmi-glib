@@ -1130,4 +1130,216 @@ qmi_message_nas_get_sys_info_reply_parse(QmiMessage *self, GError **error)
 
 /*****************************************************************************/
 
+/*****************************************************************************/
+/* Get Signal Strength */
+
+/* Type for TLV´s */
+enum {
+  QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRQ	=	0x16,
+  QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_SNR  =	0x17,
+  QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRP = 	0x18
+
+};
+
+/**
+ * _QmiNasGetRfBandOutput:
+ *
+ * An opaque type handling the output of the Get SigInfo operation.
+ */
+
+struct _LteSigStrengthRSRQ {
+	gint8 rsrq;
+	gint8 radio_if;
+
+
+}__attribute__((__packed__));
+
+struct _QmiNasGetSigStrengthOutput{
+    volatile gint ref_count;
+    GError *error;
+    struct _LteSigStrengthRSRQ lteSigStrengthRSRQ;
+    gint16 snr;
+    gint16 rsrp;
+
+};
+
+
+const guint8 qmi_nas_get_sig_strength_output_get_rsrq(QmiNasGetSigStrengthOutput *output) {
+
+    g_return_val_if_fail (output != NULL, 0);
+
+	return output->lteSigStrengthRSRQ.rsrq;
+
+}
+
+const guint8 qmi_nas_get_sig_strength_output_get_radio_if(QmiNasGetSigStrengthOutput *output) {
+
+	g_return_val_if_fail(output != NULL, 0);
+
+	return output->lteSigStrengthRSRQ.radio_if;
+}
+
+const guint16  qmi_nas_get_sig_strength_output_get_snr(QmiNasGetSigStrengthOutput *output) {
+
+	g_return_val_if_fail (output != NULL, 0);
+
+	return le16toh(output->snr);
+
+}
+
+const guint16 qmi_nas_get_sig_strength_output_get_rsrp(QmiNasGetSigStrengthOutput *output) {
+
+	g_return_val_if_fail(output != NULL, 0);
+
+	return le16toh(output->rsrp);
+}
+
+
+gboolean
+qmi_nas_get_sig_strength_output_get_result(QmiNasGetSigStrengthOutput *output, GError **error)
+{
+    g_return_val_if_fail (output != NULL, FALSE);
+
+    if (output->error)
+    {
+        if (error)
+            *error = g_error_copy (output->error);
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+
+/**
+ * qmi_message_nas_get_sig_info_output_ref:
+ * @output: a #QmiNasGetSysInfoOutput.
+ *
+ * Atomically increments the reference count of @output by one.
+ *
+ * Returns: the new reference to @output.
+ */
+QmiNasGetSigStrengthOutput*
+qmi_nas_get_sig_strength_output_ref(QmiNasGetSigStrengthOutput *output)
+{
+    g_return_val_if_fail (output != NULL, NULL);
+
+    g_atomic_int_inc (&output->ref_count);
+
+    return output;
+}
+
+/**
+ * qmi_message_nas_get_sig_info_output_unref:
+ * @output: a #QmiNasGetSysInfoOutput.
+ *
+ * Atomically decrements the reference count of @output by one.
+ * If the reference count drops to 0, @output is completely disposed.
+ */
+void
+qmi_nas_get_sig_strength_output_unref(QmiNasGetSigStrengthOutput *output)
+{
+
+    g_return_if_fail (output != NULL);
+
+    if (g_atomic_int_dec_and_test (&output->ref_count)) {
+
+        if (output->error)
+            g_error_free (output->error);
+        g_slice_free (QmiNasGetSigStrengthOutput, output);
+    }
+}
+
+QmiMessage*
+qmi_message_nas_get_sig_strength_new(guint8 transaction_id, guint8 client_id, GError **error)
+{
+	QmiMessage *message;
+	guint16 mask = 0;
+	mask |= (1<<0);	/* RSSI */
+	mask |= (1<<5); /* RSRQ */
+	mask |= (1<<6); /* SNR */
+	mask |= (1<<7); /* RSRP */
+
+	message = qmi_message_new (QMI_SERVICE_NAS,
+                            client_id,
+                            transaction_id,
+                            QMI_NAS_MESSAGE_GET_SIGNAL_STRENGTH);
+
+    if(!qmi_message_tlv_add(message,
+							0x10,
+							sizeof(mask),
+							&mask,
+							error)) {
+		g_prefix_error(error, "Failed to add Request Info to message: ");
+		qmi_message_unref (message);
+		return NULL;
+	}
+
+    return message;
+
+}
+
+QmiNasGetSigStrengthOutput*
+qmi_message_nas_get_sig_strength_reply_parse(QmiMessage *self, GError **error)
+{
+	QmiNasGetSigStrengthOutput *output;
+    GError *inner_error = NULL;
+
+
+    g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESSAGE_GET_SIGNAL_STRENGTH);
+
+    if (!qmi_message_get_response_result(self, &inner_error)) {
+        /* Only QMI protocol errors are set in the Output result, all the
+         * others (e.g. failures parsing) are directly propagated to error. */
+        if (inner_error->domain != QMI_PROTOCOL_ERROR) {
+            g_propagate_error (error, inner_error);
+            return NULL;
+        }
+
+        /* Otherwise, build output */
+    }
+
+    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
+
+    output = g_slice_new0 (QmiNasGetSigStrengthOutput);
+    output->ref_count = 1;
+    output->error = inner_error;
+
+    if(!qmi_message_tlv_get(self,
+    						QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRQ,
+							sizeof(output->lteSigStrengthRSRQ),
+							&output->lteSigStrengthRSRQ,
+							error)) {
+    	g_prefix_error (error, "Couldn't get the LTE RSRQ Signal Strength TLV: ");
+
+	}
+
+    if(!qmi_message_tlv_get(self,
+							QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_SNR,
+							sizeof(output->snr),
+							&output->snr,
+							error)) {
+		g_prefix_error (error, "Couldn't get the LTE SNR Signal Strength TLV: ");
+
+	}
+
+    if(!qmi_message_tlv_get(self,
+							QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRP,
+							sizeof(output->rsrp),
+							&output->rsrp,
+							error)) {
+		g_prefix_error (error, "Couldn't get the LTE RSRP Signal Strength TLV: ");
+
+	}
+
+
+
+    return output;
+}
+
+/*****************************************************************************/
+
+
 
