@@ -79,4 +79,5 @@ include_HEADERS = \
 	qmi-wds.h qmi-client-wds.h \
 	qmi-nas.h qmi-client-nas.h \
 	qmi-band-types.h \
-	qmi-mobile-network-code.h
+	qmi-mobile-network-code.h \
+	qmi-ctl.h qmi-message.h

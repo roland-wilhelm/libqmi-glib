@@ -49,7 +49,8 @@ AC_CONFIG_FILES([Makefile
                  build-aux/Makefile
                  src/Makefile
                  cli/Makefile
-                 utils/Makefile])
+                 utils/Makefile
+                 qmi-glib-0.0.1.pc])
 AC_OUTPUT
 
 echo "

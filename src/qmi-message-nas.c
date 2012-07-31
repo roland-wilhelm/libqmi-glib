@@ -592,7 +592,6 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
     guint8 i;
     gint index=0;
 
-    g_debug("ENTER: qmi_message_nas_get_cell_loc_info_reply_parse");
 
     g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESSAGE_GET_CELL_LOCATION_INFO);
 
@@ -608,7 +607,7 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
     }
 
 
-    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
+    //g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
 
    	output = g_slice_new0(QmiNasGetCellLocInfoOutput);
     output->ref_count = 1;
@@ -634,8 +633,6 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
     	index += sizeof(struct _LteSignal);
     }
 
-
-    g_debug("LEAVE: qmi_message_nas_get_cell_loc_info_reply_parse");
     return output;
 }
 
@@ -1164,7 +1161,8 @@ struct _QmiNasGetSigStrengthOutput{
 };
 
 
-const guint8 qmi_nas_get_sig_strength_output_get_rsrq(QmiNasGetSigStrengthOutput *output) {
+const gint8
+qmi_nas_get_sig_strength_output_get_rsrq(QmiNasGetSigStrengthOutput *output) {
 
     g_return_val_if_fail (output != NULL, 0);
 
@@ -1172,22 +1170,25 @@ const guint8 qmi_nas_get_sig_strength_output_get_rsrq(QmiNasGetSigStrengthOutput
 
 }
 
-const guint8 qmi_nas_get_sig_strength_output_get_radio_if(QmiNasGetSigStrengthOutput *output) {
+const gint8
+qmi_nas_get_sig_strength_output_get_radio_if(QmiNasGetSigStrengthOutput *output) {
 
 	g_return_val_if_fail(output != NULL, 0);
 
 	return output->lteSigStrengthRSRQ.radio_if;
 }
 
-const guint16  qmi_nas_get_sig_strength_output_get_snr(QmiNasGetSigStrengthOutput *output) {
+const float
+qmi_nas_get_sig_strength_output_get_snr(QmiNasGetSigStrengthOutput *output) {
 
 	g_return_val_if_fail (output != NULL, 0);
 
-	return le16toh(output->snr);
+	return (float)(le16toh(output->snr)) / 10;
 
 }
 
-const guint16 qmi_nas_get_sig_strength_output_get_rsrp(QmiNasGetSigStrengthOutput *output) {
+const gint16
+qmi_nas_get_sig_strength_output_get_rsrp(QmiNasGetSigStrengthOutput *output) {
 
 	g_return_val_if_fail(output != NULL, 0);
 
@@ -1301,7 +1302,7 @@ qmi_message_nas_get_sig_strength_reply_parse(QmiMessage *self, GError **error)
         /* Otherwise, build output */
     }
 
-    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
+    //g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
 
     output = g_slice_new0 (QmiNasGetSigStrengthOutput);
     output->ref_count = 1;
@@ -1313,7 +1314,8 @@ qmi_message_nas_get_sig_strength_reply_parse(QmiMessage *self, GError **error)
 							&output->lteSigStrengthRSRQ,
 							error)) {
     	g_prefix_error (error, "Couldn't get the LTE RSRQ Signal Strength TLV: ");
-
+    	if(output->error)
+    		g_error_free (output->error);
 	}
 
     if(!qmi_message_tlv_get(self,
@@ -1322,7 +1324,8 @@ qmi_message_nas_get_sig_strength_reply_parse(QmiMessage *self, GError **error)
 							&output->snr,
 							error)) {
 		g_prefix_error (error, "Couldn't get the LTE SNR Signal Strength TLV: ");
-
+		if(output->error)
+			g_error_free (output->error);
 	}
 
     if(!qmi_message_tlv_get(self,
@@ -1331,7 +1334,8 @@ qmi_message_nas_get_sig_strength_reply_parse(QmiMessage *self, GError **error)
 							&output->rsrp,
 							error)) {
 		g_prefix_error (error, "Couldn't get the LTE RSRP Signal Strength TLV: ");
-
+		if(output->error)
+			g_error_free (output->error);
 	}
 
 

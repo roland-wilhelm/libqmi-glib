@@ -66,7 +66,7 @@ struct _QmiDevicePrivate {
     /* I/O channel, set when the file is open */
     GIOChannel *iochannel;
     guint watch_id;
-    GByteArray *response;
+GByteArray *response;
 
     /* HT to keep track of ongoing transactions */
     GHashTable *transactions;
@@ -1417,6 +1417,7 @@ qmi_device_new (GFile *file,
                 GAsyncReadyCallback callback,
                 gpointer user_data)
 {
+
     g_async_initable_new_async (QMI_TYPE_DEVICE,
                                 G_PRIORITY_DEFAULT,
                                 cancellable,
@@ -1424,6 +1425,7 @@ qmi_device_new (GFile *file,
                                 user_data,
                                 QMI_DEVICE_FILE, file,
                                 NULL);
+
 }
 
 /*****************************************************************************/

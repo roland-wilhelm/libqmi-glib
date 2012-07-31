@@ -23,10 +23,10 @@ G_DEFINE_TYPE (QmiClientNas, qmi_client_nas, QMI_TYPE_CLIENT);
 QmiNasGetSigInfoOutput*
 qmi_client_nas_get_sig_info_finish(QmiClientNas *self, GAsyncResult *res, GError **error)
 {
-	g_debug("ENTER: qmi_client_nas_get_sig_info_finish");
+
     if (g_simple_async_result_propagate_error(G_SIMPLE_ASYNC_RESULT(res), error))
         return NULL;
-    g_debug("LEAVE: qmi_client_nas_get_sig_info_finish");
+
     return qmi_nas_get_sig_info_output_ref(g_simple_async_result_get_op_res_gpointer(G_SIMPLE_ASYNC_RESULT(res)));
 }
 
@@ -42,7 +42,7 @@ get_sig_info_ready(QmiDevice *device,
 	QmiNasGetSigInfoOutput *output;
     GError *error = NULL;
     QmiMessage *reply;
-    g_debug("	ENTER: get_sig_info_ready");
+
     reply = qmi_device_command_finish(device, res, &error);
     if (!reply) {
         g_prefix_error (&error, "Getting Signal Info failed: ");
@@ -66,7 +66,7 @@ get_sig_info_ready(QmiDevice *device,
     g_simple_async_result_complete(simple);
     g_object_unref(simple);
     qmi_message_unref (reply);
-    g_debug("	LEAVE: get_sig_info_ready");
+
 }
 
 /**
@@ -83,7 +83,6 @@ qmi_client_nas_get_sig_info(QmiClientNas *self,
     GSimpleAsyncResult *result;
     QmiMessage *request;
 
-g_debug("ENTER: qmi_client_nas_get_sig_info");
 
     result = g_simple_async_result_new(G_OBJECT (self),
                                         callback,
@@ -101,7 +100,7 @@ g_debug("ENTER: qmi_client_nas_get_sig_info");
                         result);
 
     qmi_message_unref (request);
-    g_debug("LEAVE: qmi_client_nas_get_sig_info");
+
 }
 
 /*****************************************************************************/
@@ -113,10 +112,10 @@ g_debug("ENTER: qmi_client_nas_get_sig_info");
 QmiNasGetCellLocInfoOutput*
 qmi_client_nas_get_cell_loc_info_finish(QmiClientNas *self, GAsyncResult *res, GError **error)
 {
-	g_debug("ENTER: qmi_client_nas_get_cell_loc_info_finish");
+
     if (g_simple_async_result_propagate_error(G_SIMPLE_ASYNC_RESULT(res), error))
         return NULL;
-    g_debug("LEAVE: qmi_client_nas_get_cell_loc_info_finish");
+
     return qmi_nas_get_cell_loc_info_output_ref(g_simple_async_result_get_op_res_gpointer(G_SIMPLE_ASYNC_RESULT(res)));
 }
 
@@ -132,7 +131,7 @@ get_cell_loc_info_ready(QmiDevice *device,
 	QmiNasGetCellLocInfoOutput *output;
     GError *error = NULL;
     QmiMessage *reply;
-    g_debug("	ENTER: get_cell_loc_info_ready");
+
     reply = qmi_device_command_finish(device, res, &error);
     if (!reply) {
         g_prefix_error (&error, "Getting Cell Location Info failed: ");
@@ -156,7 +155,7 @@ get_cell_loc_info_ready(QmiDevice *device,
     g_simple_async_result_complete(simple);
     g_object_unref(simple);
     qmi_message_unref (reply);
-    g_debug("	LEAVE: get_cell_loc_info_ready");
+
 }
 
 /**
@@ -173,7 +172,7 @@ qmi_client_nas_get_cell_loc_info(QmiClientNas *self,
     GSimpleAsyncResult *result;
     QmiMessage *request;
 
-g_debug("ENTER: qmi_client_nas_get_cell_loc_info");
+
 
     result = g_simple_async_result_new(G_OBJECT (self),
                                         callback,
@@ -191,7 +190,7 @@ g_debug("ENTER: qmi_client_nas_get_cell_loc_info");
                         result);
 
     qmi_message_unref (request);
-    g_debug("LEAVE: qmi_client_nas_get_cell_loc_info");
+
 }
 
 /*****************************************************************************/
