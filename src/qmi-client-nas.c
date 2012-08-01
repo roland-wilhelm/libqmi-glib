@@ -393,8 +393,8 @@ qmi_client_nas_get_sig_strength_finish(QmiClientNas *self, GAsyncResult *res, GE
  */
 static void
 get_sig_strength_ready(QmiDevice *device,
-               	   GAsyncResult *res,
-               	   GSimpleAsyncResult *simple)
+               	   	   GAsyncResult *res,
+               	   	   GSimpleAsyncResult *simple)
 {
 	QmiNasGetSigStrengthOutput *output;
     GError *error = NULL;

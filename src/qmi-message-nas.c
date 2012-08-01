@@ -1132,9 +1132,10 @@ qmi_message_nas_get_sys_info_reply_parse(QmiMessage *self, GError **error)
 
 /* Type for TLV´s */
 enum {
-  QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRQ	=	0x16,
-  QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_SNR  =	0x17,
-  QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRP = 	0x18
+	QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSSI	=	0x11,
+	QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRQ	=	0x16,
+	QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_SNR  	=	0x17,
+	QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRP 	= 	0x18
 
 };
 
@@ -1151,10 +1152,19 @@ struct _LteSigStrengthRSRQ {
 
 }__attribute__((__packed__));
 
+struct _LteSigStrengthRSSI {
+	gint16 num_instances;
+	gint8 rssi;
+	guint8 radio_if;
+
+
+}__attribute__((__packed__));
+
 struct _QmiNasGetSigStrengthOutput{
     volatile gint ref_count;
     GError *error;
     struct _LteSigStrengthRSRQ lteSigStrengthRSRQ;
+    struct _LteSigStrengthRSSI lteSigStrengthRSSI;
     gint16 snr;
     gint16 rsrp;
 
@@ -1193,6 +1203,15 @@ qmi_nas_get_sig_strength_output_get_rsrp(QmiNasGetSigStrengthOutput *output) {
 	g_return_val_if_fail(output != NULL, 0);
 
 	return le16toh(output->rsrp);
+}
+
+const gint16
+qmi_nas_get_sig_strength_output_get_rssi(QmiNasGetSigStrengthOutput *output) {
+
+    g_return_val_if_fail (output != NULL, 0);
+
+	return -(output->lteSigStrengthRSSI.rssi);
+
 }
 
 
@@ -1274,6 +1293,7 @@ qmi_message_nas_get_sig_strength_new(guint8 transaction_id, guint8 client_id, GE
 							&mask,
 							error)) {
 		g_prefix_error(error, "Failed to add Request Info to message: ");
+		g_error_free (*error);
 		qmi_message_unref (message);
 		return NULL;
 	}
@@ -1287,7 +1307,6 @@ qmi_message_nas_get_sig_strength_reply_parse(QmiMessage *self, GError **error)
 {
 	QmiNasGetSigStrengthOutput *output;
     GError *inner_error = NULL;
-
 
     g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESSAGE_GET_SIGNAL_STRENGTH);
 
@@ -1312,33 +1331,42 @@ qmi_message_nas_get_sig_strength_reply_parse(QmiMessage *self, GError **error)
     						QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRQ,
 							sizeof(output->lteSigStrengthRSRQ),
 							&output->lteSigStrengthRSRQ,
-							error)) {
-    	g_prefix_error (error, "Couldn't get the LTE RSRQ Signal Strength TLV: ");
-    	if(output->error)
-    		g_error_free (output->error);
+							&output->error)) {
+    	g_printerr("Couldn't get the LTE RSRQ Signal Strength TLV: %s\n", output->error->message);
+    	g_clear_error(&output->error);
+
 	}
 
     if(!qmi_message_tlv_get(self,
 							QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_SNR,
 							sizeof(output->snr),
 							&output->snr,
-							error)) {
-		g_prefix_error (error, "Couldn't get the LTE SNR Signal Strength TLV: ");
-		if(output->error)
-			g_error_free (output->error);
+							&output->error)) {
+    	g_printerr("Couldn't get the LTE SNR Signal Strength TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
+
 	}
+
 
     if(!qmi_message_tlv_get(self,
 							QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSRP,
 							sizeof(output->rsrp),
 							&output->rsrp,
-							error)) {
-		g_prefix_error (error, "Couldn't get the LTE RSRP Signal Strength TLV: ");
-		if(output->error)
-			g_error_free (output->error);
+							&output->error)) {
+    	g_printerr("Couldn't get the LTE RSRP Signal Strength TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
+
 	}
 
+    if(!qmi_message_tlv_get(self,
+							QMI_NAS_TLV_GET_LTE_SIG_STRENGTH_RSSI,
+							sizeof(output->lteSigStrengthRSSI),
+							&output->lteSigStrengthRSSI,
+							&output->error)) {
+    	g_printerr("Couldn't get the LTE RSSI Signal Strength TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
+	}
 
     return output;
 }

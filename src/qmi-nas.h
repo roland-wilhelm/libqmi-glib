@@ -115,7 +115,7 @@ const gint16 qmi_nas_get_sig_strength_output_get_rsrp(QmiNasGetSigStrengthOutput
 const float  qmi_nas_get_sig_strength_output_get_snr(QmiNasGetSigStrengthOutput *output);
 const gint8 qmi_nas_get_sig_strength_output_get_radio_if(QmiNasGetSigStrengthOutput *output);
 const gint8 qmi_nas_get_sig_strength_output_get_rsrq(QmiNasGetSigStrengthOutput *output);
-
+const gint16 qmi_nas_get_sig_strength_output_get_rssi(QmiNasGetSigStrengthOutput *output);
 
 
 
