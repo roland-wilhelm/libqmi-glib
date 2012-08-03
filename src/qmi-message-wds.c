@@ -1587,7 +1587,7 @@ qmi_message_wds_get_dun_call_reply_parse (QmiMessage *self,
         /* Otherwise, build output */
     }
 
-    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
+    //g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
 
     output = g_slice_new0(QmiWdsDunCallOutput);
     output->ref_count = 1;
@@ -1748,7 +1748,7 @@ qmi_message_wds_get_current_channel_rate_reply_parse (QmiMessage *self,
         /* Otherwise, build output */
     }
 
-    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
+    //g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
 
     output = g_slice_new0(QmiWdsCurrentChannelRateOutput);
     output->ref_count = 1;
@@ -1968,7 +1968,7 @@ qmi_message_wds_get_pkt_stat_reply_parse (QmiMessage *self,
         /* Otherwise, build output */
     }
 
-    g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
+    //g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
 
     output = g_slice_new0(QmiWdsPktStatisticsOutput);
     output->ref_count = 1;

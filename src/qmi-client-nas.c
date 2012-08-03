@@ -172,7 +172,7 @@ qmi_client_nas_get_cell_loc_info(QmiClientNas *self,
     GSimpleAsyncResult *result;
     QmiMessage *request;
 
-
+    g_print("\n<11>\n");
 
     result = g_simple_async_result_new(G_OBJECT (self),
                                         callback,
@@ -181,14 +181,14 @@ qmi_client_nas_get_cell_loc_info(QmiClientNas *self,
 
     request = qmi_message_nas_get_cell_loc_info_new(qmi_client_get_next_transaction_id(QMI_CLIENT (self)),
                                            	   qmi_client_get_cid (QMI_CLIENT(self)));
-
+    g_print("\n<12>\n");
     qmi_device_command((QmiDevice *)qmi_client_peek_device(QMI_CLIENT (self)),
                         request,
                         timeout,
                         cancellable,
                         (GAsyncReadyCallback)get_cell_loc_info_ready,
                         result);
-
+    g_print("\n<13>\n");
     qmi_message_unref (request);
 
 }
