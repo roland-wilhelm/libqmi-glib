@@ -491,8 +491,6 @@ qmi_message_dms_get_dev_mfr_reply_parse(QmiMessage *self,
 {
 	QmiDmsGetDevMfrOutput *output;
     GError *inner_error = NULL;
-    gchar *string = NULL;
-
 
     g_assert(qmi_message_get_message_id(self) == QMI_DMS_MESSAGE_GET_DEVICE_MFR);
 
@@ -510,15 +508,7 @@ qmi_message_dms_get_dev_mfr_reply_parse(QmiMessage *self,
     output = g_slice_new0 (QmiDmsGetDevMfrOutput);
     output->ref_count = 1;
     output->error = inner_error;
-    string = qmi_message_tlv_get_string(self, QMI_DMS_TLV_GET_DEV_MFR, error);
-
-    if(!string) {
-
-    		g_prefix_error (error, "Couldn't get the Device Manufacturer TLV: ");
-
-    	}
-
-    output->device_mfr = (string ? g_strdup (string) : "unknown");
+    output->device_mfr = qmi_message_tlv_get_string(self, QMI_DMS_TLV_GET_DEV_MFR, error);
 
     return output;
 }
@@ -616,8 +606,6 @@ qmi_message_dms_get_dev_model_id_reply_parse(QmiMessage *self,
 {
 	QmiDmsGetDevModelIdOutput *output;
     GError *inner_error = NULL;
-    gchar *string = NULL;
-
 
     g_assert(qmi_message_get_message_id(self) == QMI_DMS_MESSAGE_GET_DEVICE_MODEL_ID);
 
@@ -635,15 +623,7 @@ qmi_message_dms_get_dev_model_id_reply_parse(QmiMessage *self,
     output = g_slice_new0 (QmiDmsGetDevModelIdOutput);
     output->ref_count = 1;
     output->error = inner_error;
-    string = qmi_message_tlv_get_string(self, QMI_DMS_TLV_GET_DEV_MODEL_ID, error);
-
-    if(!string) {
-
-    		g_prefix_error (error, "Couldn't get the Device Model ID TLV: ");
-
-    	}
-
-    output->device_model_id = (string ? g_strdup (string) : "unknown");
+    output->device_model_id = qmi_message_tlv_get_string(self, QMI_DMS_TLV_GET_DEV_MODEL_ID, error);
 
     return output;
 }
@@ -741,8 +721,6 @@ qmi_message_dms_get_dev_rev_id_reply_parse(QmiMessage *self,
 {
 	QmiDmsGetDevRevIdOutput *output;
     GError *inner_error = NULL;
-    gchar *string = NULL;
-
 
     g_assert(qmi_message_get_message_id(self) == QMI_DMS_MESSAGE_GET_DEVICE_REV_ID);
 
@@ -760,15 +738,7 @@ qmi_message_dms_get_dev_rev_id_reply_parse(QmiMessage *self,
     output = g_slice_new0 (QmiDmsGetDevRevIdOutput);
     output->ref_count = 1;
     output->error = inner_error;
-    string = qmi_message_tlv_get_string(self, QMI_DMS_TLV_GET_DEV_REVISION_ID, error);
-
-    if(!string) {
-
-    		g_prefix_error (error, "Couldn't get the Device Revision ID TLV: ");
-
-    	}
-
-    output->device_revision_id = (string ? g_strdup (string) : "unknown");
+    output->device_revision_id = qmi_message_tlv_get_string(self, QMI_DMS_TLV_GET_DEV_REVISION_ID, error);
 
     return output;
 }
@@ -866,8 +836,6 @@ qmi_message_dms_get_hardware_rev_id_reply_parse(QmiMessage *self,
 {
 	QmiDmsGetDevHardwareRevIdOutput *output;
     GError *inner_error = NULL;
-    gchar *string = NULL;
-
 
     g_assert(qmi_message_get_message_id(self) == QMI_DMS_MESSAGE_GET_DEVICE_HARDWARE_REV);
 
@@ -885,15 +853,7 @@ qmi_message_dms_get_hardware_rev_id_reply_parse(QmiMessage *self,
     output = g_slice_new0 (QmiDmsGetDevHardwareRevIdOutput);
     output->ref_count = 1;
     output->error = inner_error;
-    string = qmi_message_tlv_get_string(self, QMI_DMS_TLV_GET_DEV_HARDWARE_REVISION_ID, error);
-
-    if(!string) {
-
-    		g_prefix_error (error, "Couldn't get the Device Revision ID TLV: ");
-
-    	}
-
-    output->hardware_rev = (string ? g_strdup (string) : "unknown");
+    output->hardware_rev = qmi_message_tlv_get_string(self, QMI_DMS_TLV_GET_DEV_HARDWARE_REVISION_ID, error);
 
     return output;
 }
@@ -1011,8 +971,6 @@ qmi_message_dms_get_msisdn_reply_parse(QmiMessage *self,
 {
 	QmiDmsGetMsisdnOutput *output;
     GError *inner_error = NULL;
-
-
 
     g_assert(qmi_message_get_message_id(self) == QMI_DMS_MESSAGE_GET_DEVICE_MSISDN);
 
@@ -1132,8 +1090,6 @@ qmi_message_dms_get_sw_version_reply_parse(QmiMessage *self,
 {
 	QmiDmsGetSwVersionOutput *output;
     GError *inner_error = NULL;
-
-
 
     g_assert(qmi_message_get_message_id(self) == QMI_DMS_MESSAGE_GET_SW_VERSION);
 

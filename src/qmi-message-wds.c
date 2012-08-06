@@ -1977,64 +1977,72 @@ qmi_message_wds_get_pkt_stat_reply_parse (QmiMessage *self,
     if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_TX_PKT_OK,
 						sizeof(output->pkt_stat.tx_ok_pkt),
 						&output->pkt_stat.tx_ok_pkt,
-						error)) {
-    	g_prefix_error (error, "Couldn't get the Tx Packet OK TLV: ");
+						&output->error)) {
+    	g_printerr("Couldn't get the Tx Packet OK TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
     }
 
     if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_RX_PKT_OK,
     						sizeof(output->pkt_stat.rx_ok_pkt),
     						&output->pkt_stat.rx_ok_pkt,
-    						error)) {
-		g_prefix_error (error, "Couldn't get the Rx Packet OK TLV: ");
+    						&output->error)) {
+		g_printerr("Couldn't get the Rx Packet OK TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
 	}
 
     if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_TX_PKT_ERRORS,
         						sizeof(output->pkt_stat.tx_err_pkt),
         						&output->pkt_stat.tx_err_pkt,
-        						error)) {
-		g_prefix_error (error, "Couldn't get the Tx Packet Error TLV: ");
+        						&output->error)) {
+		g_printerr("Couldn't get the Tx Packet Error TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
 	}
 
     if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_RX_PKT_ERRORS,
             						sizeof(output->pkt_stat.rx_err_pkt),
             						&output->pkt_stat.rx_err_pkt,
-            						error)) {
-		g_prefix_error (error, "Couldn't get the Rx Packet Error TLV: ");
+            						&output->error)) {
+		g_printerr("Couldn't get the Rx Packet Error TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
 	}
 
     if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_TX_OVERFLOWS,
                						sizeof(output->pkt_stat.tx_ofl_pkt),
                						&output->pkt_stat.tx_ofl_pkt,
-               						error)) {
-		g_prefix_error (error, "Couldn't get the Tx Packet Overflows TLV: ");
+               						&output->error)) {
+		g_printerr("Couldn't get the Tx Packet Overflows TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
 	}
 
     if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_RX_OVERFLOWS,
                    						sizeof(output->pkt_stat.rx_ofl_pkt),
                    						&output->pkt_stat.rx_ofl_pkt,
-                   						error)) {
-		g_prefix_error (error, "Couldn't get the Rx Packet Overflows TLV: ");
+                   						&output->error)) {
+		g_printerr("Couldn't get the Rx Packet Overflows TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
 	}
 
     if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_TX_BYTES_OK,
                        						sizeof(output->pkt_stat.tx_bytes_ok),
                        						&output->pkt_stat.tx_bytes_ok,
-                       						error)) {
-		g_prefix_error (error, "Couldn't get the Tx Bytes OK TLV: ");
+                       						&output->error)) {
+		g_printerr("Couldn't get the Tx Bytes OK TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
 	}
 
     if(!qmi_message_tlv_get(self, QMI_WDS_TLV_GET_RX_BYTES_OK,
                            						sizeof(output->pkt_stat.rx_bytes_ok),
                            						&output->pkt_stat.rx_bytes_ok,
-                           						error)) {
-		g_prefix_error (error, "Couldn't get the Rx Bytes OK TLV: ");
+                           						&output->error)) {
+		g_printerr("Couldn't get the Rx Bytes OK TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
 
 	}
 

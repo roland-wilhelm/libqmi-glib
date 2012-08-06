@@ -207,7 +207,6 @@ qmi_message_nas_get_sig_info_reply_parse(QmiMessage *self, GError **error)
 	QmiNasGetSigInfoOutput *output;
     GError *inner_error = NULL;
 
-
     g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESSAGE_GET_SIG_INFO);
 
     if (!qmi_message_get_response_result(self, &inner_error)) {
@@ -234,8 +233,6 @@ qmi_message_nas_get_sig_info_reply_parse(QmiMessage *self, GError **error)
 		qmi_nas_get_sig_info_output_unref(output);
 		return NULL;
 	}
-
-
 
     return output;
 }
@@ -565,14 +562,17 @@ qmi_nas_get_cell_loc_info_output_unref(QmiNasGetCellLocInfoOutput *output)
     if (g_atomic_int_dec_and_test (&output->ref_count)) {
 
     	for(i = 0; i < output->lteInfo.cells_len; i++) {
-    		g_slice_free(struct _LteSignal, output->lteSignal[i]);
+    		//g_slice_free(struct _LteSignal, output->lteSignal[i]);
+    		g_free(output->lteSignal[i]);
     	}
 
         if (output->error)
             g_error_free (output->error);
 
-        g_slice_free(struct _LteSignal *, output->lteSignal);
-        g_slice_free(QmiNasGetCellLocInfoOutput, output);
+        //g_slice_free(struct _LteSignal *, output->lteSignal);
+        //g_slice_free(QmiNasGetCellLocInfoOutput, output);
+        g_free(output->lteSignal);
+		g_free(output);
     }
 }
 
@@ -590,10 +590,9 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
 {
 	QmiNasGetCellLocInfoOutput *output;
     GError *inner_error = NULL;
-    gchar * pResponse = NULL;
+    gchar *pResponse = NULL;
     guint8 i;
     gint index=0;
-
 
     g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESSAGE_GET_CELL_LOCATION_INFO);
 
@@ -611,33 +610,30 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
 
     //g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
 
-   	output = g_slice_new0(QmiNasGetCellLocInfoOutput);
-    output->ref_count = 1;
-    output->error = inner_error;
-
-
     if(!(pResponse = qmi_message_tlv_get_string(self,
     						QMI_NAS_TLV_GET_LTE_INFO_INTRA,
 							error))) {
 		g_prefix_error (error, "Couldn't get the Cell Location Info TLV: ");
-		qmi_nas_get_cell_loc_info_output_unref(output);
 		return NULL;
 	}
+
+    //output = g_slice_new0(QmiNasGetCellLocInfoOutput);
+    output = g_new0(QmiNasGetCellLocInfoOutput, 1);
+	output->ref_count = 1;
+	output->error = inner_error;
 
     memcpy(&output->lteInfo, pResponse, sizeof(output->lteInfo));
     index = sizeof(output->lteInfo);
 
-    output->lteSignal = g_slice_alloc0(output->lteInfo.cells_len * sizeof(struct _LteSignal *));
-	if(!output->lteSignal) {
+    //output->lteInfo.cells_len = (output->lteInfo.cells_len < 10) ? output->lteInfo.cells_len : 10;
 
-		g_printerr("lteSignal[] could not be allocated.\n");
-		qmi_nas_get_cell_loc_info_output_unref(output);
-		return NULL;
-	}
+    output->lteSignal = g_new0(struct _LteSignal *, output->lteInfo.cells_len);
+
 
     for(i = 0; i < output->lteInfo.cells_len; i++) {
 
-    	output->lteSignal[i] = g_slice_new0(struct _LteSignal);
+    	//output->lteSignal[i] = g_slice_new0(struct _LteSignal);
+    	output->lteSignal[i] = g_new0(struct _LteSignal, 1);
     	if(!output->lteSignal[i]) {
 
 			g_printerr("lteSignal[%d] could not be allocated.\n", i);
@@ -648,6 +644,9 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
     	memcpy(output->lteSignal[i], &pResponse[index], sizeof(struct _LteSignal));
     	index += sizeof(struct _LteSignal);
     }
+
+    if(pResponse)
+    	g_free(pResponse);
 
     return output;
 }
@@ -807,14 +806,17 @@ qmi_nas_get_rf_band_output_unref(QmiNasGetRfBandOutput *output)
     if (g_atomic_int_dec_and_test (&output->ref_count)) {
 
     	for(i = 0; i < output->instances; i++) {
-    		g_slice_free(struct _RfBand, output->rfBand[i]);
+    		//g_slice_free(struct _RfBand, output->rfBand[i]);
+    		g_free(output->rfBand[i]);
     	}
 
         if (output->error)
             g_error_free (output->error);
 
-        g_slice_free(struct _RfBand *, output->rfBand);
-        g_slice_free(QmiNasGetRfBandOutput, output);
+        //g_slice_free(struct _RfBand *, output->rfBand);
+        g_free(output->rfBand);
+        //g_slice_free(QmiNasGetRfBandOutput, output);
+        g_free(output);
     }
 }
 
@@ -851,33 +853,29 @@ qmi_message_nas_get_rf_band_reply_parse(QmiMessage *self, GError **error)
 
     //g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
 
-    output = g_slice_new0 (QmiNasGetRfBandOutput);
-    output->ref_count = 1;
-    output->error = inner_error;
-
     if(!(pResponse = qmi_message_tlv_get_string(self,
     											QMI_NAS_TLV_GET_RF_BAND_INFO,
     											error))) {
 		g_prefix_error (error, "Couldn't get the RF Band Info TLV: ");
-		qmi_nas_get_rf_band_output_unref(output);
 		return NULL;
 	}
+
+    //output = g_slice_new0 (QmiNasGetRfBandOutput);
+    output = g_new0(QmiNasGetRfBandOutput, 1);
+	output->ref_count = 1;
+	output->error = inner_error;
 
     index = 0;
     memcpy(&output->instances, &pResponse[index], sizeof(output->instances));
     index = sizeof(output->instances);
 
-    output->rfBand = g_slice_alloc0(output->instances * sizeof(struct _RfBand *));
-	if(!output->rfBand) {
+    //output->rfBand = g_slice_alloc0(output->instances * sizeof(struct _RfBand *));
+    output->rfBand = g_new0(struct _RfBand *, output->instances);
 
-		g_printerr("rfBand[] could not be allocated.\n");
-		qmi_nas_get_rf_band_output_unref(output);
-		return NULL;
-	}
+	for(i = 0; i < output->instances; i++) {
 
-    for(i = 0; i < output->instances; i++) {
-
-		output->rfBand[i] = g_slice_new0(struct _RfBand);
+//		output->rfBand[i] = g_slice_new0(struct _RfBand);
+		output->rfBand[i] = g_new0(struct _RfBand, 1);
 		if(!output->rfBand[i]) {
 
 			g_printerr("rfBand[%i] could not be allocated.\n", i);
@@ -887,8 +885,10 @@ qmi_message_nas_get_rf_band_reply_parse(QmiMessage *self, GError **error)
 		memcpy(output->rfBand[i], &pResponse[index], sizeof(struct _RfBand));
 		index += sizeof(struct _RfBand);
 
-   }
+	}
 
+    if(pResponse)
+		g_free(pResponse);
 
     return output;
 }
@@ -1122,7 +1122,6 @@ qmi_message_nas_get_sys_info_reply_parse(QmiMessage *self, GError **error)
 	QmiNasGetSysInfoOutput *output;
     GError *inner_error = NULL;
 
-
     g_assert(qmi_message_get_message_id(self) == QMI_NAS_MAESSAGE_GET_SYS_INFO);
 
     if (!qmi_message_get_response_result(self, &inner_error)) {
@@ -1151,8 +1150,6 @@ qmi_message_nas_get_sys_info_reply_parse(QmiMessage *self, GError **error)
 		qmi_nas_get_sys_info_output_unref(output);
 		return NULL;
 	}
-
-
 
     return output;
 }
@@ -1186,7 +1183,7 @@ struct _LteSigStrengthRSRQ {
 
 struct _LteSigStrengthRSSI {
 	gint16 num_instances;
-	gint8 rssi;
+	guint8 rssi;
 	guint8 radio_if;
 
 
