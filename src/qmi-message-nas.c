@@ -1402,5 +1402,363 @@ qmi_message_nas_get_sig_strength_reply_parse(QmiMessage *self, GError **error)
 
 /*****************************************************************************/
 
+/*****************************************************************************/
+/* Get System Selection Preference */
+
+/* Type for TLV´s */
+enum {
+
+	QMI_NAS_TLV_GET_MODE_PREF				=	0x11,
+	QMI_NAS_TLV_GET_LTE_BAND_PREF		  	=	0x15
+
+};
+
+
+
+struct _QmiNasGetSystemSelectionPrefOutput{
+    volatile gint ref_count;
+    GError *error;
+    guint16 mode_pref;
+    guint64 lte_band_pref;
+
+};
+
+
+const guint16
+qmi_nas_get_system_selection_pref_output_get_mode_pref(QmiNasGetSystemSelectionPrefOutput *output) {
+
+	g_return_val_if_fail(output != NULL, 0);
+
+	return le16toh(output->mode_pref);
+}
+
+const guint64
+qmi_nas_get_system_selection_pref_output_get_lte_band_pref(QmiNasGetSystemSelectionPrefOutput *output) {
+
+    g_return_val_if_fail (output != NULL, 0);
+
+	return le64toh(output->lte_band_pref);
+
+}
+
+
+gboolean
+qmi_nas_get_system_selection_pref_output_get_result(QmiNasGetSystemSelectionPrefOutput *output, GError **error)
+{
+    g_return_val_if_fail (output != NULL, FALSE);
+
+    if (output->error)
+    {
+        if (error)
+            *error = g_error_copy (output->error);
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+
+/**
+ * qmi_message_nas_get_sig_info_output_ref:
+ * @output: a #QmiNasGetSysInfoOutput.
+ *
+ * Atomically increments the reference count of @output by one.
+ *
+ * Returns: the new reference to @output.
+ */
+QmiNasGetSystemSelectionPrefOutput*
+qmi_nas_get_system_selection_pref_output_ref(QmiNasGetSystemSelectionPrefOutput *output)
+{
+    g_return_val_if_fail (output != NULL, NULL);
+
+    g_atomic_int_inc (&output->ref_count);
+
+    return output;
+}
+
+/**
+ * qmi_message_nas_get_sig_info_output_unref:
+ * @output: a #QmiNasGetSysInfoOutput.
+ *
+ * Atomically decrements the reference count of @output by one.
+ * If the reference count drops to 0, @output is completely disposed.
+ */
+void
+qmi_nas_get_system_selection_pref_output_unref(QmiNasGetSystemSelectionPrefOutput *output)
+{
+
+    g_return_if_fail (output != NULL);
+
+    if (g_atomic_int_dec_and_test (&output->ref_count)) {
+
+        if (output->error)
+            g_error_free (output->error);
+        g_slice_free (QmiNasGetSystemSelectionPrefOutput, output);
+    }
+}
+
+QmiMessage*
+qmi_message_nas_get_system_selection_pref_new(guint8 transaction_id, guint8 client_id, GError **error)
+{
+	QmiMessage *message;
+
+	message = qmi_message_new (QMI_SERVICE_NAS,
+                            client_id,
+                            transaction_id,
+                            QMI_NAS_MESAGE_GET_SYSTEM_SELECTION_PREF);
+
+
+    return message;
+
+}
+
+gboolean
+qmi_nas_set_system_selection_pref_output_get_result(QmiNasGetSystemSelectionPrefOutput *output, GError **error)
+{
+    g_return_val_if_fail (output != NULL, FALSE);
+
+    if (output->error)
+    {
+        if (error)
+            *error = g_error_copy (output->error);
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+QmiNasGetSystemSelectionPrefOutput*
+qmi_message_nas_get_system_selection_pref_reply_parse(QmiMessage *self, GError **error)
+{
+	QmiNasGetSystemSelectionPrefOutput *output;
+    GError *inner_error = NULL;
+
+    g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESAGE_GET_SYSTEM_SELECTION_PREF);
+
+    if (!qmi_message_get_response_result(self, &inner_error)) {
+        /* Only QMI protocol errors are set in the Output result, all the
+         * others (e.g. failures parsing) are directly propagated to error. */
+        if (inner_error->domain != QMI_PROTOCOL_ERROR) {
+            g_propagate_error (error, inner_error);
+            return NULL;
+        }
+
+        /* Otherwise, build output */
+    }
+
+
+
+    output = g_slice_new0 (QmiNasGetSystemSelectionPrefOutput);
+    output->ref_count = 1;
+    output->error = inner_error;
+
+    if(!qmi_message_tlv_get(self,
+    						QMI_NAS_TLV_GET_MODE_PREF,
+							sizeof(output->mode_pref),
+							&output->mode_pref,
+							&output->error)) {
+    	g_printerr("Couldn't get the Mode Preference TLV: %s\n", output->error->message);
+    	g_clear_error(&output->error);
+
+	}
+
+    if(!qmi_message_tlv_get(self,
+    						QMI_NAS_TLV_GET_LTE_BAND_PREF,
+							sizeof(output->lte_band_pref),
+							&output->lte_band_pref,
+							&output->error)) {
+		g_printerr("Couldn't get the LTE Band Preference TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
+
+	}
+
+
+
+    return output;
+}
+
+/*****************************************************************************/
+
+
+/*****************************************************************************/
+/* Set System Selection Preference */
+
+/* Type for TLV´s */
+enum {
+
+	QMI_NAS_TLV_SET_MODE_PREF				=	0x11,
+	QMI_NAS_TLV_SET_LTE_BAND_PREF		  	=	0x15
+
+};
+
+
+struct _QmiNasSetSystemSelectionPrefOutput{
+    volatile gint ref_count;
+    GError *error;
+
+};
+
+struct _QmiNasSetSystemSelectionPrefInput {
+    volatile gint ref_count;
+
+    guint16 mode_pref_mask;
+    guint64 lte_band_mask;
+};
+
+
+void
+qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput *input,
+												guint16 mode_pref_mask,
+												guint64 lte_band_mask)
+{
+    g_return_if_fail (input != NULL);
+
+    input->mode_pref_mask = mode_pref_mask;
+    input->lte_band_mask = lte_band_mask;
+}
+
+
+
+
+QmiNasSetSystemSelectionPrefInput*
+qmi_nas_set_system_selection_pref_input_new (void)
+{
+	QmiNasSetSystemSelectionPrefInput *input;
+
+    input = g_slice_new0 (QmiNasSetSystemSelectionPrefInput);
+    input->ref_count = 1;
+    return input;
+}
+
+
+QmiNasSetSystemSelectionPrefInput*
+qmi_nas_set_system_selection_pref_input_ref (QmiNasSetSystemSelectionPrefInput *input)
+{
+    g_return_val_if_fail (input != NULL, NULL);
+
+    g_atomic_int_inc (&input->ref_count);
+    return input;
+}
+
+
+void
+qmi_nas_set_system_selection_pref_input_unref (QmiNasSetSystemSelectionPrefInput *input)
+{
+    g_return_if_fail (input != NULL);
+
+    if (g_atomic_int_dec_and_test (&input->ref_count)) {
+        g_slice_free (QmiNasSetSystemSelectionPrefInput, input);
+    }
+}
+
+
+QmiNasSetSystemSelectionPrefOutput*
+qmi_nas_set_system_selection_pref_output_ref(QmiNasSetSystemSelectionPrefOutput *output)
+{
+    g_return_val_if_fail (output != NULL, NULL);
+
+    g_atomic_int_inc (&output->ref_count);
+
+    return output;
+}
+
+
+void
+qmi_nas_set_system_selection_pref_output_unref(QmiNasSetSystemSelectionPrefOutput *output)
+{
+
+    g_return_if_fail (output != NULL);
+
+    if (g_atomic_int_dec_and_test (&output->ref_count)) {
+
+        if (output->error)
+            g_error_free (output->error);
+        g_slice_free (QmiNasSetSystemSelectionPrefOutput, output);
+    }
+}
+
+QmiMessage*
+qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
+												guint8 client_id,
+												QmiNasSetSystemSelectionPrefInput *input,
+												GError **error)
+{
+	QmiMessage *message;
+
+
+//	if (!input->lte_band_mask) {
+//		g_set_error (error,
+//					 QMI_CORE_ERROR,
+//					 QMI_CORE_ERROR_INVALID_ARGS,
+//					 "Invalid 'lte_band_mask': %u",
+//					 (guint64)input->lte_band_mask);
+//		return NULL;
+//	}
+
+	message = qmi_message_new (QMI_SERVICE_NAS,
+								client_id,
+								transaction_id,
+								QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREF);
+
+//	if(!qmi_message_tlv_add(message,
+//							QMI_NAS_TLV_GET_MODE_PREF,
+//							sizeof(mode_pref_mask),
+//							&mode_pref_mask,
+//							error)) {
+//
+//		g_prefix_error(error, "Failed to add mode_pref_mask Request Info to message: ");
+//		g_error_free (*error);
+//		qmi_message_unref (message);
+//		return NULL;
+//	}
+
+	if(!qmi_message_tlv_add(message,
+							QMI_NAS_TLV_GET_LTE_BAND_PREF,
+							sizeof(input->lte_band_mask),
+							&input->lte_band_mask,
+							error)) {
+
+		g_prefix_error(error, "Failed to add lte_band_mask Request Info to message: ");
+		g_error_free (*error);
+		qmi_message_unref (message);
+		return NULL;
+	}
+
+	return message;
+
+}
+
+QmiNasSetSystemSelectionPrefOutput*
+qmi_message_nas_set_system_selection_pref_reply_parse(QmiMessage *self, GError **error)
+{
+	QmiNasSetSystemSelectionPrefOutput *output;
+    GError *inner_error = NULL;
+
+    g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREF);
+
+    if (!qmi_message_get_response_result(self, &inner_error)) {
+        /* Only QMI protocol errors are set in the Output result, all the
+         * others (e.g. failures parsing) are directly propagated to error. */
+        if (inner_error->domain != QMI_PROTOCOL_ERROR) {
+            g_propagate_error (error, inner_error);
+            return NULL;
+        }
+
+        /* Otherwise, build output */
+    }
+
+    output = g_slice_new0 (QmiNasSetSystemSelectionPrefOutput);
+    output->ref_count = 1;
+    output->error = inner_error;
+
+
+    return output;
+}
+
+/*****************************************************************************/
+
 
 

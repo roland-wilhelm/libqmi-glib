@@ -458,6 +458,196 @@ qmi_client_nas_get_sig_strength(QmiClientNas *self,
 
 }
 
+/*****************************************************************************/
+/* Get System Selection Preference */
+
+/**
+ *
+ */
+QmiNasGetSystemSelectionPrefOutput*
+qmi_client_nas_get_system_selection_pref_finish(QmiClientNas *self, GAsyncResult *res, GError **error)
+{
+
+    if (g_simple_async_result_propagate_error(G_SIMPLE_ASYNC_RESULT(res), error))
+        return NULL;
+
+    return qmi_nas_get_system_selection_pref_output_ref(g_simple_async_result_get_op_res_gpointer(G_SIMPLE_ASYNC_RESULT(res)));
+}
+
+/**
+ *
+ *
+ */
+static void
+get_system_selection_pref_ready(QmiDevice *device,
+               	   	   GAsyncResult *res,
+               	   	   GSimpleAsyncResult *simple)
+{
+	QmiNasGetSystemSelectionPrefOutput *output;
+    GError *error = NULL;
+    QmiMessage *reply;
+
+    reply = qmi_device_command_finish(device, res, &error);
+    if (!reply) {
+        g_prefix_error (&error, "Getting System Selection Preference failed: ");
+        g_simple_async_result_take_error (simple, error);
+        g_simple_async_result_complete (simple);
+        g_object_unref (simple);
+        return;
+    }
+
+    /* Parse reply */
+    output = qmi_message_nas_get_system_selection_pref_reply_parse(reply, &error);
+    if (!output) {
+        g_prefix_error (&error, "Getting System Selection Preference reply parsing failed: ");
+        g_simple_async_result_take_error (simple, error);
+    }
+    else
+        g_simple_async_result_set_op_res_gpointer (simple,
+                                                   output,
+                                                   (GDestroyNotify)qmi_nas_get_system_selection_pref_output_unref);
+
+    g_simple_async_result_complete(simple);
+    g_object_unref(simple);
+    qmi_message_unref (reply);
+
+}
+
+/**
+ *
+ *
+ */
+void
+qmi_client_nas_get_system_selection_pref(QmiClientNas *self,
+										guint timeout,
+										GCancellable *cancellable,
+										GAsyncReadyCallback callback,
+										gpointer user_data)
+{
+    GSimpleAsyncResult *result;
+    QmiMessage *request;
+    GError *error = NULL;
+
+    result = g_simple_async_result_new(G_OBJECT (self),
+                                        callback,
+                                        user_data,
+                                        qmi_client_nas_get_system_selection_pref);
+
+    request = qmi_message_nas_get_system_selection_pref_new(qmi_client_get_next_transaction_id(QMI_CLIENT (self)),
+                                           	   qmi_client_get_cid (QMI_CLIENT(self)), &error);
+
+    qmi_device_command((QmiDevice *)qmi_client_peek_device(QMI_CLIENT (self)),
+                        request,
+                        timeout,
+                        cancellable,
+                        (GAsyncReadyCallback)get_system_selection_pref_ready,
+                        result);
+
+    qmi_message_unref (request);
+
+}
+
+/*****************************************************************************/
+/* Set System Selection Preference */
+
+/**
+ *
+ */
+QmiNasSetSystemSelectionPrefOutput*
+qmi_client_nas_set_system_selection_pref_finish(QmiClientNas *self, GAsyncResult *res, GError **error)
+{
+
+    if (g_simple_async_result_propagate_error(G_SIMPLE_ASYNC_RESULT(res), error))
+        return NULL;
+
+    return qmi_nas_set_system_selection_pref_output_ref(g_simple_async_result_get_op_res_gpointer(G_SIMPLE_ASYNC_RESULT(res)));
+}
+
+/**
+ *
+ *
+ */
+static void
+set_system_selection_pref_ready(QmiDevice *device,
+               	   	   GAsyncResult *res,
+               	   	   GSimpleAsyncResult *simple)
+{
+	GError *error = NULL;
+    QmiMessage *reply;
+    QmiNasSetSystemSelectionPrefOutput *output;
+
+    reply = qmi_device_command_finish(device, res, &error);
+    if (!reply) {
+        g_prefix_error (&error, "Setting System Selection Preference failed: ");
+        g_simple_async_result_take_error (simple, error);
+        g_simple_async_result_complete (simple);
+        g_object_unref (simple);
+        return;
+    }
+
+    /* Parse reply */
+    output = qmi_message_nas_set_system_selection_pref_reply_parse(reply, &error);
+    if (!output) {
+        g_prefix_error (&error, "Getting System Selection Preference reply parsing failed: ");
+        g_simple_async_result_take_error (simple, error);
+    }
+    else
+        g_simple_async_result_set_op_res_gpointer (simple,
+                                                   output,
+                                                   (GDestroyNotify)qmi_nas_set_system_selection_pref_output_unref);
+
+    g_simple_async_result_complete(simple);
+    g_object_unref(simple);
+    qmi_message_unref (reply);
+
+}
+
+/**
+ *
+ *
+ */
+void
+qmi_client_nas_set_system_selection_pref(QmiClientNas *self,
+										QmiNasSetSystemSelectionPrefInput *input,
+										guint timeout,
+										GCancellable *cancellable,
+										GAsyncReadyCallback callback,
+										gpointer user_data)
+{
+    GSimpleAsyncResult *result;
+    QmiMessage *request;
+    GError *error = NULL;
+
+    result = g_simple_async_result_new(G_OBJECT (self),
+                                        callback,
+                                        user_data,
+                                        qmi_client_nas_set_system_selection_pref);
+
+    request = qmi_message_nas_set_system_selection_pref_new(qmi_client_get_next_transaction_id(QMI_CLIENT (self)),
+                                           	   qmi_client_get_cid (QMI_CLIENT(self)),
+												input,
+												&error);
+
+
+	if (!request) {
+		g_prefix_error (&error, "Couldn't create request message: ");
+		g_simple_async_result_take_error (result, error);
+		g_simple_async_result_complete_in_idle (result);
+		g_object_unref (result);
+		return;
+	}
+
+    qmi_device_command((QmiDevice *)qmi_client_peek_device(QMI_CLIENT (self)),
+                        request,
+                        timeout,
+                        cancellable,
+                       (GAsyncReadyCallback)set_system_selection_pref_ready,
+                        result);
+
+    qmi_message_unref (request);
+
+}
+
 
 
 

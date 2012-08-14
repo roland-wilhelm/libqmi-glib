@@ -48,6 +48,29 @@ QmiNasGetSysInfoOutput*				qmi_message_nas_get_sys_info_reply_parse (QmiMessage 
 QmiMessage*							qmi_message_nas_get_sig_strength_new         (guint8 transaction_id, guint8 client_id, GError **error);
 QmiNasGetSigStrengthOutput*				qmi_message_nas_get_sig_strength_reply_parse (QmiMessage *self, GError **error);
 
+
+/*****************************************************************************/
+/* Get System Selection Preference */
+
+QmiMessage*
+qmi_message_nas_get_system_selection_pref_new(guint8 transaction_id, guint8 client_id, GError **error);
+
+QmiNasGetSystemSelectionPrefOutput*
+qmi_message_nas_get_system_selection_pref_reply_parse(QmiMessage *self, GError **error);
+
+
+/*****************************************************************************/
+/* Get System Selection Preference */
+
+QmiMessage*
+qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
+												guint8 client_id,
+												QmiNasSetSystemSelectionPrefInput *input,
+												GError **error);
+
+QmiNasSetSystemSelectionPrefOutput*
+qmi_message_nas_set_system_selection_pref_reply_parse(QmiMessage *self, GError **error);
+
 G_END_DECLS
 
 

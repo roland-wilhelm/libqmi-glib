@@ -98,6 +98,36 @@ qmi_client_nas_get_sig_strength(QmiClientNas *self,
 							gpointer user_data);
 
 
+/*****************************************************************************/
+/* Get System Selection Preference */
+
+QmiNasGetSystemSelectionPrefOutput*
+qmi_client_nas_get_system_selection_pref_finish(QmiClientNas *self, GAsyncResult *res, GError **error);
+
+void
+qmi_client_nas_get_system_selection_pref(QmiClientNas *self,
+										guint timeout,
+										GCancellable *cancellable,
+										GAsyncReadyCallback callback,
+										gpointer user_data);
+
+/*****************************************************************************/
+/* Set System Selection Preference */
+
+void
+qmi_client_nas_set_system_selection_pref(QmiClientNas *self,
+										QmiNasSetSystemSelectionPrefInput *input,
+										guint timeout,
+										GCancellable *cancellable,
+										GAsyncReadyCallback callback,
+										gpointer user_data);
+
+QmiNasSetSystemSelectionPrefOutput*
+qmi_client_nas_set_system_selection_pref_finish(QmiClientNas *self, GAsyncResult *res, GError **error);
+
+
+
+
 
 G_END_DECLS
 

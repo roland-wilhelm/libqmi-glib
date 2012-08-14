@@ -19,7 +19,8 @@ typedef enum {
 	QMI_NAS_MESSAGE_GET_SIGNAL_STRENGTH				=	0x0020, /* v1.0 needed - deprecated - */
     QMI_NAS_MESSAGE_PERFORM_NETWORK_SCAN			=	0x0021, /* v1.0 needed, unused currently */
     QMI_NAS_MESSAGE_GET_RF_BAND_INFO				=	0x0031, /* v1.1 needed */
-    QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREFERENCE	= 	0x0033, /* v1.1 needed, unused currently */
+    QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREF		= 	0x0033, /* v1.1 needed, unused currently */
+    QMI_NAS_MESAGE_GET_SYSTEM_SELECTION_PREF		=	0x0034,
     QMI_NAS_MESSAGE_GET_CELL_LOCATION_INFO			=	0x0043, /* v1.4 needed */
     QMI_NAS_MAESSAGE_GET_SYS_INFO					=	0x004D, /* v1.8 needed */
     QMI_NAS_MESSAGE_GET_SIG_INFO					=	0x004F, /* v1.8 needed */
@@ -118,6 +119,56 @@ const gint8 qmi_nas_get_sig_strength_output_get_rsrq(QmiNasGetSigStrengthOutput 
 const gint16 qmi_nas_get_sig_strength_output_get_rssi(QmiNasGetSigStrengthOutput *output);
 
 
+
+/*****************************************************************************/
+/* Get System Selection Preference */
+
+typedef struct _QmiNasGetSystemSelectionPrefOutput QmiNasGetSystemSelectionPrefOutput;
+
+const guint16
+qmi_nas_get_system_selection_pref_output_get_mode_pref(QmiNasGetSystemSelectionPrefOutput *output);
+
+const guint64
+qmi_nas_get_system_selection_pref_output_get_lte_band_pref(QmiNasGetSystemSelectionPrefOutput *output);
+
+gboolean
+qmi_nas_get_system_selection_pref_output_get_result(QmiNasGetSystemSelectionPrefOutput *output, GError **error);
+
+QmiNasGetSystemSelectionPrefOutput*
+qmi_nas_get_system_selection_pref_output_ref(QmiNasGetSystemSelectionPrefOutput *output);
+
+void
+qmi_nas_get_system_selection_pref_output_unref(QmiNasGetSystemSelectionPrefOutput *output);
+
+
+/*****************************************************************************/
+/* Set System Selection Preference */
+
+typedef struct _QmiNasSetSystemSelectionPrefOutput QmiNasSetSystemSelectionPrefOutput;
+typedef struct _QmiNasSetSystemSelectionPrefInput QmiNasSetSystemSelectionPrefInput;
+
+void
+qmi_nas_set_system_selection_pref_output_unref(QmiNasSetSystemSelectionPrefOutput *output);
+
+QmiNasSetSystemSelectionPrefOutput*
+qmi_nas_set_system_selection_pref_output_ref(QmiNasSetSystemSelectionPrefOutput *output);
+
+gboolean
+qmi_nas_set_system_selection_pref_output_get_result(QmiNasGetSystemSelectionPrefOutput *output, GError **error);
+
+void
+qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput *input,
+												guint16 mode_pref_mask,
+												guint64 lte_band_mask);
+
+QmiNasSetSystemSelectionPrefInput*
+qmi_nas_set_system_selection_pref_input_ref (QmiNasSetSystemSelectionPrefInput *input);
+
+void
+qmi_nas_set_system_selection_pref_input_unref (QmiNasSetSystemSelectionPrefInput *input);
+
+QmiNasSetSystemSelectionPrefInput*
+qmi_nas_set_system_selection_pref_input_new (void);
 
 
 G_END_DECLS
