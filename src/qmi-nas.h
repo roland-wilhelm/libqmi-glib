@@ -154,7 +154,7 @@ QmiNasSetSystemSelectionPrefOutput*
 qmi_nas_set_system_selection_pref_output_ref(QmiNasSetSystemSelectionPrefOutput *output);
 
 gboolean
-qmi_nas_set_system_selection_pref_output_get_result(QmiNasGetSystemSelectionPrefOutput *output, GError **error);
+qmi_nas_set_system_selection_pref_output_get_result(QmiNasSetSystemSelectionPrefOutput *output, GError **error);
 
 void
 qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput *input,

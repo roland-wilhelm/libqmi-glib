@@ -1478,6 +1478,8 @@ qmi_nas_get_system_selection_pref_output_ref(QmiNasGetSystemSelectionPrefOutput 
     return output;
 }
 
+
+
 /**
  * qmi_message_nas_get_sig_info_output_unref:
  * @output: a #QmiNasGetSysInfoOutput.
@@ -1514,21 +1516,6 @@ qmi_message_nas_get_system_selection_pref_new(guint8 transaction_id, guint8 clie
 
 }
 
-gboolean
-qmi_nas_set_system_selection_pref_output_get_result(QmiNasGetSystemSelectionPrefOutput *output, GError **error)
-{
-    g_return_val_if_fail (output != NULL, FALSE);
-
-    if (output->error)
-    {
-        if (error)
-            *error = g_error_copy (output->error);
-
-        return FALSE;
-    }
-
-    return TRUE;
-}
 
 QmiNasGetSystemSelectionPrefOutput*
 qmi_message_nas_get_system_selection_pref_reply_parse(QmiMessage *self, GError **error)
@@ -1678,6 +1665,22 @@ qmi_nas_set_system_selection_pref_output_unref(QmiNasSetSystemSelectionPrefOutpu
             g_error_free (output->error);
         g_slice_free (QmiNasSetSystemSelectionPrefOutput, output);
     }
+}
+
+gboolean
+qmi_nas_set_system_selection_pref_output_get_result(QmiNasSetSystemSelectionPrefOutput *output, GError **error)
+{
+    g_return_val_if_fail (output != NULL, FALSE);
+
+    if (output->error)
+    {
+        if (error)
+            *error = g_error_copy (output->error);
+
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 QmiMessage*
