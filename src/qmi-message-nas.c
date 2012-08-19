@@ -143,14 +143,14 @@ qmi_nas_get_sig_info_output_get_rsrp(QmiNasGetSigInfoOutput *output)
  *
  * Returns: the RSSI.
  */
-const gfloat
+const gint16
 qmi_nas_get_sig_info_output_get_snr(QmiNasGetSigInfoOutput *output)
 {
 
     g_return_val_if_fail (output != NULL, 0);
 
 
-    return (gfloat)le16toh(output->lteSignal.snr)/10;
+    return le16toh(output->lteSignal.snr);
 
 }
 

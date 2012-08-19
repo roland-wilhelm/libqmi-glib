@@ -40,7 +40,7 @@ gboolean            			qmi_nas_get_sig_info_output_get_result		(QmiNasGetSigInfo
 const gint8						qmi_nas_get_sig_info_output_get_rssi		(QmiNasGetSigInfoOutput *output);
 const gint16					qmi_nas_get_sig_info_output_get_rsrp  		(QmiNasGetSigInfoOutput *output);
 const gint8						qmi_nas_get_sig_info_output_get_rsrq  		(QmiNasGetSigInfoOutput *output);
-const gfloat					qmi_nas_get_sig_info_output_get_snr   		(QmiNasGetSigInfoOutput *output);
+const gint16					qmi_nas_get_sig_info_output_get_snr   		(QmiNasGetSigInfoOutput *output);
 
 
 /*****************************************************************************/

@@ -150,7 +150,7 @@ get_sig_info_ready(QmiClientNas *client,
              "\tRSSI: '%d'\n"
              "\tRSRP: '%d'\n"
              "\tRSRQ: '%d'\n"
-    		 "\t SNR: '%f'\n",
+    		 "\t SNR: '%d'\n",
              qmi_device_get_path_display (ctx->device),
              qmi_nas_get_sig_info_output_get_rssi (output),
              qmi_nas_get_sig_info_output_get_rsrp (output),
