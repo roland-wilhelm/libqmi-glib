@@ -580,8 +580,8 @@ get_dun_call_ready(QmiClientWds *client, GAsyncResult *res)
     }
 
     g_print("[%s] Dun call info retrieved:\n", qmi_device_get_path_display(ctx->device));
-    g_print("\tTx bytes ok: %llu\n", qmi_wds_get_dun_call_output_get_tx_bytes_ok(output));
-    g_print("\tRx bytes ok: %llu\n", qmi_wds_get_dun_call_output_get_rx_bytes_ok(output));
+    g_print("\tTx bytes ok: %lld\n", qmi_wds_get_dun_call_output_get_tx_bytes_ok(output));
+    g_print("\tRx bytes ok: %lld\n", qmi_wds_get_dun_call_output_get_rx_bytes_ok(output));
     g_print("\tTx current channel rate: %u\n", qmi_wds_get_dun_call_output_get_current_channel_tx_rate(output));
     g_print("\tRx current channel rate: %u\n", qmi_wds_get_dun_call_output_get_current_channel_rx_rate(output));
     g_print("\tTx max. channel rate: %u\n", qmi_wds_get_dun_call_output_get_max_channel_tx_rate(output));
@@ -654,8 +654,8 @@ get_pkt_stat_ready(QmiClientWds *client, GAsyncResult *res)
     g_print("\tRx packet error: %u\n", qmi_wds_get_pkt_stat_output_get_rx_err_pkt(output));
     g_print("\tTx packet overflow: %u\n", qmi_wds_get_pkt_stat_output_get_tx_ofl_pkt(output));
     g_print("\tRx packet overflow: %u\n", qmi_wds_get_pkt_stat_output_get_rx_ofl_pkt(output));
-    g_print("\tTx bytes ok: %llu\n", qmi_wds_get_pkt_stat_output_get_tx_bytes_ok(output));
-    g_print("\tRx bytes ok: %llu\n", qmi_wds_get_pkt_stat_output_get_rx_bytes_ok(output));
+    g_print("\tTx bytes ok: %lld\n", qmi_wds_get_pkt_stat_output_get_tx_bytes_ok(output));
+    g_print("\tRx bytes ok: %lld\n", qmi_wds_get_pkt_stat_output_get_rx_bytes_ok(output));
 
     qmi_wds_get_pkt_stat_output_unref(output);
     shutdown(TRUE);

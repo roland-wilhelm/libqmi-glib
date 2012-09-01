@@ -434,11 +434,11 @@ const guint16
 qmi_nas_get_cell_loc_info_output_get_pci(QmiNasGetCellLocInfoOutput *output, guint8 index)
 {
 
-    g_return_val_if_fail (output != NULL, 0);
+    g_return_val_if_fail(output, 0);
 
 
-    if((index >= 0) || (index < output->lteInfo.cells_len)) {
-
+    if((index >= 0) && (index < output->lteInfo.cells_len)) {
+    	/* FIXME: index = 0 --> adresse = 0 */
     	return le16toh(output->lteSignal[index]->pci);
     }
     else {
@@ -456,7 +456,7 @@ qmi_nas_get_cell_loc_info_output_get_rsrq(QmiNasGetCellLocInfoOutput *output, gu
     g_return_val_if_fail (output != NULL, 0);
 
 
-	if((index >= 0) || (index < output->lteInfo.cells_len)) {
+	if((index >= 0) && (index < output->lteInfo.cells_len)) {
 
 		return (gfloat)le16toh(output->lteSignal[index]->rsrq)/10;
 	}
@@ -476,7 +476,7 @@ qmi_nas_get_cell_loc_info_output_get_rsrp(QmiNasGetCellLocInfoOutput *output, gu
     g_return_val_if_fail (output != NULL, 0.0);
 
 
-	if((index >= 0) || (index < output->lteInfo.cells_len)) {
+	if((index >= 0) && (index < output->lteInfo.cells_len)) {
 
 		return (gfloat)le16toh(output->lteSignal[index]->rsrp)/10;
 	}
@@ -496,7 +496,7 @@ qmi_nas_get_cell_loc_info_output_get_rssi(QmiNasGetCellLocInfoOutput *output, gu
     g_return_val_if_fail (output != NULL, 0);
 
 
-    if((index >= 0) || (index < output->lteInfo.cells_len)) {
+    if((index >= 0) && (index < output->lteInfo.cells_len)) {
 
 		return (gfloat)le16toh(output->lteSignal[index]->rssi)/10;
 	}
@@ -516,7 +516,7 @@ qmi_nas_get_cell_loc_info_output_get_srxlev(QmiNasGetCellLocInfoOutput *output, 
     g_return_val_if_fail (output != NULL, 0);
 
 
-    if((index >= 0) || (index < output->lteInfo.cells_len)) {
+    if((index >= 0) && (index < output->lteInfo.cells_len)) {
 
    		return le16toh(output->lteSignal[index]->srxlev);
    	}
@@ -562,15 +562,13 @@ qmi_nas_get_cell_loc_info_output_unref(QmiNasGetCellLocInfoOutput *output)
     if (g_atomic_int_dec_and_test (&output->ref_count)) {
 
     	for(i = 0; i < output->lteInfo.cells_len; i++) {
-    		//g_slice_free(struct _LteSignal, output->lteSignal[i]);
+
     		g_free(output->lteSignal[i]);
     	}
 
         if (output->error)
             g_error_free (output->error);
 
-        //g_slice_free(struct _LteSignal *, output->lteSignal);
-        //g_slice_free(QmiNasGetCellLocInfoOutput, output);
         g_free(output->lteSignal);
 		g_free(output);
     }
@@ -608,8 +606,6 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
     }
 
 
-    //g_debug("Size of Msg: %d  --> Message: %s\n", qmi_message_get_length(self), qmi_message_get_printable(self, ""));
-
     if(!(pResponse = qmi_message_tlv_get_string(self,
     						QMI_NAS_TLV_GET_LTE_INFO_INTRA,
 							error))) {
@@ -617,7 +613,7 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
 		return NULL;
 	}
 
-    //output = g_slice_new0(QmiNasGetCellLocInfoOutput);
+
     output = g_new0(QmiNasGetCellLocInfoOutput, 1);
 	output->ref_count = 1;
 	output->error = inner_error;
@@ -625,14 +621,12 @@ qmi_message_nas_get_cell_loc_info_reply_parse(QmiMessage *self, GError **error)
     memcpy(&output->lteInfo, pResponse, sizeof(output->lteInfo));
     index = sizeof(output->lteInfo);
 
-    //output->lteInfo.cells_len = (output->lteInfo.cells_len < 10) ? output->lteInfo.cells_len : 10;
-
     output->lteSignal = g_new0(struct _LteSignal *, output->lteInfo.cells_len);
 
 
     for(i = 0; i < output->lteInfo.cells_len; i++) {
 
-    	//output->lteSignal[i] = g_slice_new0(struct _LteSignal);
+
     	output->lteSignal[i] = g_new0(struct _LteSignal, 1);
     	if(!output->lteSignal[i]) {
 
@@ -716,7 +710,7 @@ qmi_nas_get_rf_band_output_get_radio_if(QmiNasGetRfBandOutput *output, guint8 in
     g_return_val_if_fail (output != NULL, 0);
 
 
-	if((index >= 0) || (index < output->instances)) {
+	if((index >= 0) && (index < output->instances)) {
 
 		return output->rfBand[index]->radio_if;
 	}
@@ -737,7 +731,7 @@ qmi_nas_get_rf_band_output_get_active_band(QmiNasGetRfBandOutput *output, guint8
     g_return_val_if_fail (output != NULL, NULL);
 
 
-    if((index >= 0) || (index < output->instances)) {
+    if((index >= 0) && (index < output->instances)) {
 
 		return qmi_band_enum_get_string(le16toh(output->rfBand[index]->active_band));
 	}
@@ -757,7 +751,7 @@ qmi_nas_get_rf_band_output_get_active_channel(QmiNasGetRfBandOutput *output, gui
     g_return_val_if_fail (output != NULL, 0);
 
 
-	if((index >= 0) || (index < output->instances)) {
+	if((index >= 0) && (index < output->instances)) {
 
 		return le16toh(output->rfBand[index]->actice_channel);
 	}
@@ -1581,6 +1575,20 @@ enum {
 
 };
 
+typedef enum {
+
+	GSM	 	= 1<<2,
+	UMTS 	= 1<<3,
+	LTE 	= 1<<4
+
+}System_Selection_Mode_Preference;
+
+typedef enum {
+
+	BAND_7 	= 1<<6,		/* LTE 2,6 GHz Band 7 */
+	BAND_20 = 1<<19		/* LTE 800 MHz Band 20 */
+
+}System_Selection_Band_Preference;
 
 struct _QmiNasSetSystemSelectionPrefOutput{
     volatile gint ref_count;
@@ -1603,8 +1611,26 @@ qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput 
 {
     g_return_if_fail (input != NULL);
 
-    input->mode_pref_mask = mode_pref_mask;
-    input->lte_band_mask = lte_band_mask;
+    switch(lte_band_mask) {
+
+		case 7:
+			input->mode_pref_mask = LTE;
+			input->lte_band_mask = BAND_7;
+			break;
+
+		case 20:
+			input->mode_pref_mask = LTE;
+			input->lte_band_mask = BAND_20;
+			break;
+
+		default:
+			//input->mode_pref_mask = LTE;
+			input->lte_band_mask = (BAND_7 | BAND_20);
+			break;
+
+	}
+
+
 }
 
 
@@ -1691,15 +1717,6 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 {
 	QmiMessage *message;
 
-
-//	if (!input->lte_band_mask) {
-//		g_set_error (error,
-//					 QMI_CORE_ERROR,
-//					 QMI_CORE_ERROR_INVALID_ARGS,
-//					 "Invalid 'lte_band_mask': %u",
-//					 (guint64)input->lte_band_mask);
-//		return NULL;
-//	}
 
 	message = qmi_message_new (QMI_SERVICE_NAS,
 								client_id,

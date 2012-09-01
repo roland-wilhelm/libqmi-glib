@@ -10,6 +10,11 @@
 
 #include <glib.h>
 
+G_BEGIN_DECLS
+
+
+
+
 typedef enum {
 	NAS_ACTIVE_BAND_E_UTRA_OPERATING_BAND_1		=	120,
 	NAS_ACTIVE_BAND_E_UTRA_OPERATING_BAND_2,
@@ -50,6 +55,6 @@ typedef enum {
 
 const gchar* qmi_band_enum_get_string(QmiBandEnum val);
 
-
+G_END_DECLS
 
 #endif /* _LIBQMI_GLIB_QMI_BAND_CLASS_H_ */

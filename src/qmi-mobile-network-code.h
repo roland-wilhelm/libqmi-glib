@@ -11,6 +11,8 @@
 
 #include <glib.h>
 
+G_BEGIN_DECLS
+
 typedef enum {
 
 	GERMANY		=	262,
@@ -38,5 +40,5 @@ typedef enum {
 const gchar* qmi_mcc_get_string(QmiMccEnum val);
 const gchar* qmi_mnc_get_string(QmiMncEnum val);
 
-
+G_END_DECLS
 #endif /* _LIBQMI_GLIB_QMI_MOBILE_NETWORK_CODE_H_ */

@@ -50,7 +50,7 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  cli/Makefile
                  utils/Makefile
-                 qmi-glib-0.0.1.pc])
+                 qmi-glib.pc])
 AC_OUTPUT
 
 echo "
