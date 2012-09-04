@@ -1723,28 +1723,34 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 								transaction_id,
 								QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREF);
 
+
+
+	if(input) {
+
+		if(!qmi_message_tlv_add(message,
+								QMI_NAS_TLV_SET_LTE_BAND_PREF,
+								sizeof(input->lte_band_mask),
+								&input->lte_band_mask,
+								error)) {
+
+			g_prefix_error(error, "Failed to add lte_band_mask Request Info to message: ");
+			g_error_free(*error);
+			qmi_message_unref(message);
+			return NULL;
+		}
+
 //	if(!qmi_message_tlv_add(message,
-//							QMI_NAS_TLV_GET_MODE_PREF,
-//							sizeof(mode_pref_mask),
-//							&mode_pref_mask,
+//							QMI_NAS_TLV_SET_MODE_PREF,
+//							sizeof(input->mode_pref_mask),
+//							&input->mode_pref_mask,
 //							error)) {
 //
 //		g_prefix_error(error, "Failed to add mode_pref_mask Request Info to message: ");
-//		g_error_free (*error);
-//		qmi_message_unref (message);
+//		g_error_free(*error);
+//		qmi_message_unref(message);
 //		return NULL;
 //	}
 
-	if(!qmi_message_tlv_add(message,
-							QMI_NAS_TLV_GET_LTE_BAND_PREF,
-							sizeof(input->lte_band_mask),
-							&input->lte_band_mask,
-							error)) {
-
-		g_prefix_error(error, "Failed to add lte_band_mask Request Info to message: ");
-		g_error_free (*error);
-		qmi_message_unref (message);
-		return NULL;
 	}
 
 	return message;
