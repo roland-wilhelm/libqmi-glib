@@ -37,6 +37,8 @@
 #include "qmi-enum-types.h"
 #include "qmi-client-nas.h"
 
+
+
 static void async_initable_iface_init (GAsyncInitableIface *iface);
 
 G_DEFINE_TYPE_EXTENDED (QmiDevice, qmi_device, G_TYPE_OBJECT, 0,

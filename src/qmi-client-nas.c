@@ -533,8 +533,8 @@ qmi_client_nas_get_system_selection_pref(QmiClientNas *self,
                                         user_data,
                                         qmi_client_nas_get_system_selection_pref);
 
-    request = qmi_message_nas_get_system_selection_pref_new(qmi_client_get_next_transaction_id(QMI_CLIENT (self)),
-                                           	   qmi_client_get_cid (QMI_CLIENT(self)), &error);
+    request = qmi_message_nas_get_system_selection_pref_new(   qmi_client_get_next_transaction_id(QMI_CLIENT (self)),
+                                           	   	   	   	   	   qmi_client_get_cid (QMI_CLIENT(self)), &error);
 
     qmi_device_command((QmiDevice *)qmi_client_peek_device(QMI_CLIENT (self)),
                         request,

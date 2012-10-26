@@ -50,7 +50,7 @@ static gboolean device_open_version_info_flag;
 static gboolean device_open_sync_flag;
 static gchar *client_cid_str;
 static gboolean client_no_release_cid_flag;
-static gboolean verbose_flag;
+static gboolean verbose_flag=TRUE;
 static gboolean silent_flag;
 static gboolean version_flag;
 

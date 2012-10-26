@@ -1571,22 +1571,23 @@ qmi_message_nas_get_system_selection_pref_reply_parse(QmiMessage *self, GError *
 enum {
 
 	QMI_NAS_TLV_SET_MODE_PREF				=	0x11,
-	QMI_NAS_TLV_SET_LTE_BAND_PREF		  	=	0x15
+	QMI_NAS_TLV_SET_LTE_BAND_PREF		  	=	0x15,
+	QMI_NAS_TLV_SET_NETWORK_SELECT_PREF		= 	0x16
 
 };
 
 typedef enum {
 
-	GSM	 	= 1<<2,
-	UMTS 	= 1<<3,
-	LTE 	= 1<<4
+	GSM	 	= 0x0004,//1<<2,
+	UMTS 	= 0x0008,//1<<3,
+	LTE 	= 0x0010//1<<4
 
 }System_Selection_Mode_Preference;
 
 typedef enum {
 
-	BAND_7 	= 1<<6,		/* LTE 2,6 GHz Band 7 */
-	BAND_20 = 1<<19		/* LTE 800 MHz Band 20 */
+	BAND_7 	= 0x40ull,//1<<6,		/* LTE 2,6 GHz Band 7 */
+	BAND_20 = 0x80000ull //1<<19		/* LTE 800 MHz Band 20 */
 
 }System_Selection_Band_Preference;
 
@@ -1614,18 +1615,18 @@ qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput 
     switch(lte_band_mask) {
 
 		case 7:
-			input->mode_pref_mask = LTE;
-			input->lte_band_mask = BAND_7;
+			input->mode_pref_mask = htole16(LTE);
+			input->lte_band_mask = htole64(BAND_7);
 			break;
 
 		case 20:
-			input->mode_pref_mask = LTE;
-			input->lte_band_mask = BAND_20;
+			input->mode_pref_mask = htole16(LTE);
+			input->lte_band_mask = htole64(BAND_20);
 			break;
 
 		default:
-			//input->mode_pref_mask = LTE;
-			input->lte_band_mask = (BAND_7 | BAND_20);
+			input->mode_pref_mask = htole16((LTE));
+			input->lte_band_mask = htole64(0x00000000FFFFFFFFULL); //((BAND_7) | (BAND_20));
 			break;
 
 	}
@@ -1739,19 +1740,32 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 			return NULL;
 		}
 
-//	if(!qmi_message_tlv_add(message,
-//							QMI_NAS_TLV_SET_MODE_PREF,
-//							sizeof(input->mode_pref_mask),
-//							&input->mode_pref_mask,
-//							error)) {
-//
-//		g_prefix_error(error, "Failed to add mode_pref_mask Request Info to message: ");
-//		g_error_free(*error);
-//		qmi_message_unref(message);
-//		return NULL;
-//	}
+		if(!qmi_message_tlv_add(message,
+								QMI_NAS_TLV_SET_MODE_PREF,
+								sizeof(input->mode_pref_mask),
+								&input->mode_pref_mask,
+								error)) {
 
+			g_prefix_error(error, "Failed to add mode_pref_mask Request Info to message: ");
+			g_error_free(*error);
+			qmi_message_unref(message);
+			return NULL;
+		}
 	}
+
+	if(!qmi_message_tlv_add(message,
+								0x17,
+								0x0001,
+								0x00,
+								error)) {
+
+			g_prefix_error(error, "Failed to add set network selection preference Request Info to message: ");
+			g_error_free(*error);
+			qmi_message_unref(message);
+			return NULL;
+		}
+
+
 
 	return message;
 
