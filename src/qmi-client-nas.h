@@ -126,6 +126,36 @@ QmiNasSetSystemSelectionPrefOutput*
 qmi_client_nas_set_system_selection_pref_finish(QmiClientNas *self, GAsyncResult *res, GError **error);
 
 
+/*****************************************************************************/
+/* Get Technology Preference */
+
+void
+qmi_client_nas_get_technology_pref(		QmiClientNas *self,
+										guint timeout,
+										GCancellable *cancellable,
+										GAsyncReadyCallback callback,
+										gpointer user_data);
+
+QmiNasGetTechnologyPrefOutput*
+qmi_client_nas_get_technology_pref_finish(QmiClientNas *self, GAsyncResult *res, GError **error);
+
+
+
+/*****************************************************************************/
+/* Set Technology Preference */
+
+void
+qmi_client_nas_set_technology_pref(		QmiClientNas *self,
+										QmiNasSetTechnologyPrefInput *input,
+										guint timeout,
+										GCancellable *cancellable,
+										GAsyncReadyCallback callback,
+										gpointer user_data);
+
+QmiNasSetTechnologyPrefOutput*
+qmi_client_nas_set_technology_pref_finish(QmiClientNas *self, GAsyncResult *res, GError **error);
+
+
 
 
 

@@ -1410,6 +1410,7 @@ enum {
 
 
 struct _QmiNasGetSystemSelectionPrefOutput{
+
     volatile gint ref_count;
     GError *error;
     guint16 mode_pref;
@@ -1572,70 +1573,95 @@ enum {
 
 	QMI_NAS_TLV_SET_MODE_PREF				=	0x11,
 	QMI_NAS_TLV_SET_LTE_BAND_PREF		  	=	0x15,
-	QMI_NAS_TLV_SET_NETWORK_SELECT_PREF		= 	0x16
+	QMI_NAS_TLV_SET_CHANGE_DURATION			= 	0x17
 
 };
 
-typedef enum {
-
-	GSM	 	= 0x0004,//1<<2,
-	UMTS 	= 0x0008,//1<<3,
-	LTE 	= 0x0010//1<<4
-
-}System_Selection_Mode_Preference;
-
-typedef enum {
-
-	BAND_7 	= 0x40ull,//1<<6,		/* LTE 2,6 GHz Band 7 */
-	BAND_20 = 0x80000ull //1<<19		/* LTE 800 MHz Band 20 */
-
-}System_Selection_Band_Preference;
 
 struct _QmiNasSetSystemSelectionPrefOutput{
+
     volatile gint ref_count;
     GError *error;
 
 };
 
 struct _QmiNasSetSystemSelectionPrefInput {
+
     volatile gint ref_count;
 
     guint16 mode_pref_mask;
     guint64 lte_band_mask;
+    guint8 change_duration;
+
 };
 
 
 void
 qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput *input,
-												guint16 mode_pref_mask,
-												guint64 lte_band_mask)
+												Set_System_Selection_Mode_Preference mode_pref_mask,
+												Set_System_Selection_LTE_Band_Preference lte_band_mask,
+												Set_System_Selection_Change_Duration change_duration)
 {
     g_return_if_fail (input != NULL);
 
     switch(lte_band_mask) {
 
-		case 7:
-			input->mode_pref_mask = htole16(LTE);
-			input->lte_band_mask = htole64(BAND_7);
+    	default:
+		case SYSTEM_SELECTION_BAND_AUTOMATIC:
+			input->lte_band_mask = htole64((guint64)(0xFFFFFFFFFFFFFFFFull)); // ALL
 			break;
 
-		case 20:
-			input->mode_pref_mask = htole16(LTE);
-			input->lte_band_mask = htole64(BAND_20);
+		case SYSTEM_SELECTION_BAND_7:
+			input->lte_band_mask = htole64((guint64)(1<<6));	/* LTE 2,6 GHz Band 7 */
 			break;
 
-		default:
-			input->mode_pref_mask = htole16((LTE));
-			input->lte_band_mask = htole64(0x00000000FFFFFFFFULL); //((BAND_7) | (BAND_20));
+		case SYSTEM_SELECTION_BAND_3:
+			input->lte_band_mask = htole64((guint64)(1<<2));
 			break;
+
+		case SYSTEM_SELECTION_BAND_20:
+			input->lte_band_mask = htole64((guint64)(1<<19));			/* LTE 800 MHz Band 20 */
+			break;
+
+	}
+
+    switch(mode_pref_mask) {
+
+    	default:
+		case SYSTEM_SELECTION_MODE_AUTOMATIC:
+			input->mode_pref_mask = htole16((guint16)(0xFF));	// ALL
+			break;
+
+		case SYSTEM_SELECTION_GSM:
+			input->mode_pref_mask = htole16((guint16)(1<<2));	// GSM
+			break;
+
+		case SYSTEM_SELECTION_UMTS:
+			input->mode_pref_mask = htole16((guint16)(1<<3));	// UMTS
+			break;
+
+		case SYSTEM_SELECTION_LTE:
+			input->mode_pref_mask = htole16((guint16)(1<<4));	// LTE
+			break;
+
+	}
+
+    switch(change_duration) {
+
+    	default:
+		case SYSTEM_SELECTION_POWER_CYCLE:
+			input->change_duration = (guint8)(0x00);
+			break;
+
+		case SYSTEM_SELECTION_PERMANENT:
+			input->change_duration = (guint8)(0x01);
+			break;
+
 
 	}
 
 
 }
-
-
-
 
 QmiNasSetSystemSelectionPrefInput*
 qmi_nas_set_system_selection_pref_input_new (void)
@@ -1728,16 +1754,19 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 
 	if(input) {
 
-		if(!qmi_message_tlv_add(message,
-								QMI_NAS_TLV_SET_LTE_BAND_PREF,
-								sizeof(input->lte_band_mask),
-								&input->lte_band_mask,
-								error)) {
+		if(input->mode_pref_mask == SYSTEM_SELECTION_LTE) {
+
+			if(!qmi_message_tlv_add(message,
+							QMI_NAS_TLV_SET_LTE_BAND_PREF,
+							sizeof(input->lte_band_mask),
+							&input->lte_band_mask,
+							error)) {
 
 			g_prefix_error(error, "Failed to add lte_band_mask Request Info to message: ");
 			g_error_free(*error);
 			qmi_message_unref(message);
 			return NULL;
+			}
 		}
 
 		if(!qmi_message_tlv_add(message,
@@ -1751,20 +1780,20 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 			qmi_message_unref(message);
 			return NULL;
 		}
-	}
 
-	if(!qmi_message_tlv_add(message,
-								0x17,
-								0x0001,
-								0x00,
+		/* Change Duration is set to Power cycle - remains active until the next device power cycle */
+		if(!qmi_message_tlv_add(message,
+								QMI_NAS_TLV_SET_CHANGE_DURATION,
+								sizeof(input->change_duration),
+								&input->change_duration,
 								error)) {
 
-			g_prefix_error(error, "Failed to add set network selection preference Request Info to message: ");
+			g_prefix_error(error, "Failed to add set change duration Request Info to message: ");
 			g_error_free(*error);
 			qmi_message_unref(message);
 			return NULL;
 		}
-
+	}
 
 
 	return message;
@@ -1800,5 +1829,380 @@ qmi_message_nas_set_system_selection_pref_reply_parse(QmiMessage *self, GError *
 
 /*****************************************************************************/
 
+/*****************************************************************************/
+/* Get Technology Preference */
+
+/* Type for TLV´s */
+enum {
+
+	QMI_NAS_TLV_GET_ACTIVE_TECHNOLOGY_PREF			=	0x01,
+	QMI_NAS_TLV_GET_PERSISTENT_TECHNOLOGY_PREF	  	=	0x10
+
+};
+
+struct _QmiNasGetTechnologyActiveTechPref {
+
+    guint16 active_technology_pref;
+    guint8 active_technology_duration;
+
+}__attribute__((__packed__));
+
+struct _QmiNasGetTechnologyPrefOutput {
+
+    volatile gint ref_count;
+    GError *error;
+    struct _QmiNasGetTechnologyActiveTechPref QmiNasGetTechnologyActiveTechPref;
+    guint16 persistent_technology_pref;
+
+};
 
 
+
+const guint16
+qmi_nas_get_technology_pref_output_get_active_technoloy_pref(QmiNasGetTechnologyPrefOutput *output) {
+
+	g_return_val_if_fail(output != NULL, 0);
+
+	return le16toh(output->QmiNasGetTechnologyActiveTechPref.active_technology_pref);
+}
+
+const guint8
+qmi_nas_get_technology_pref_output_get_active_technology_duration_pref(QmiNasGetTechnologyPrefOutput *output) {
+
+	g_return_val_if_fail(output != NULL, 0);
+
+	return output->QmiNasGetTechnologyActiveTechPref.active_technology_duration;
+}
+
+const guint16
+qmi_nas_get_technology_pref_output_get_persistent_technoloy_pref(QmiNasGetTechnologyPrefOutput *output) {
+
+	g_return_val_if_fail(output != NULL, 0);
+
+	return le16toh(output->persistent_technology_pref);
+}
+
+gboolean
+qmi_nas_get_technology_pref_output_get_result(QmiNasGetTechnologyPrefOutput *output, GError **error) {
+
+	g_return_val_if_fail (output != NULL, FALSE);
+
+	if (output->error)
+	{
+		if (error)
+			*error = g_error_copy (output->error);
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+QmiNasGetTechnologyPrefOutput*
+qmi_nas_get_technology_pref_output_ref(QmiNasGetTechnologyPrefOutput *output) {
+
+	g_return_val_if_fail (output != NULL, NULL);
+
+	g_atomic_int_inc (&output->ref_count);
+
+	return output;
+}
+
+void
+qmi_nas_get_technology_pref_output_unref(QmiNasGetTechnologyPrefOutput *output) {
+
+	g_return_if_fail (output != NULL);
+
+	if (g_atomic_int_dec_and_test (&output->ref_count)) {
+
+		if (output->error)
+			g_error_free (output->error);
+		g_slice_free (QmiNasGetTechnologyPrefOutput, output);
+	}
+}
+
+QmiMessage*
+qmi_message_nas_get_technology_pref_new(	guint8 transaction_id,
+											guint8 client_id,
+											GError **error) {
+
+	QmiMessage *message;
+
+	message = qmi_message_new(	QMI_SERVICE_NAS,
+								client_id,
+								transaction_id,
+								QMI_NAS_MESSAGE_GET_TECHNOLOGY_PREF);
+
+
+	return message;
+}
+
+QmiNasGetTechnologyPrefOutput*
+qmi_message_nas_get_technology_pref_reply_parse(QmiMessage *self, GError **error) {
+
+	QmiNasGetTechnologyPrefOutput *output;
+	GError *inner_error = NULL;
+
+	g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESSAGE_GET_TECHNOLOGY_PREF);
+
+	if (!qmi_message_get_response_result(self, &inner_error)) {
+		/* Only QMI protocol errors are set in the Output result, all the
+		 * others (e.g. failures parsing) are directly propagated to error. */
+		if (inner_error->domain != QMI_PROTOCOL_ERROR) {
+			g_propagate_error (error, inner_error);
+			return NULL;
+		}
+
+		/* Otherwise, build output */
+	}
+
+
+
+	output = g_slice_new0(QmiNasGetTechnologyPrefOutput);
+	output->ref_count = 1;
+	output->error = inner_error;
+
+	if(!qmi_message_tlv_get(self,
+							QMI_NAS_TLV_GET_ACTIVE_TECHNOLOGY_PREF,
+							sizeof(output->QmiNasGetTechnologyActiveTechPref),
+							&output->QmiNasGetTechnologyActiveTechPref,
+							&output->error)) {
+		g_printerr("Couldn't get the active Technology Preference TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
+
+	}
+
+	if(!qmi_message_tlv_get(self,
+							QMI_NAS_TLV_GET_PERSISTENT_TECHNOLOGY_PREF,
+							sizeof(output->persistent_technology_pref),
+							&output->persistent_technology_pref,
+							&output->error)) {
+		g_printerr("Couldn't get the persistent Technology Preference TLV: %s\n", output->error->message);
+		g_clear_error(&output->error);
+
+	}
+
+
+	return output;
+}
+
+
+/*****************************************************************************/
+/*****************************************************************************/
+/* Set Technology Preference */
+
+
+/* Type for TLV´s */
+enum {
+
+	QMI_NAS_TLV_SET_TECHNOLOGY_PREF		=	0x01
+};
+
+
+struct _SetTechnologyActiveTechPref {
+
+	guint16 technology_pref;
+	guint8 technology_duration;
+
+}__attribute__((__packed__));
+
+
+struct _QmiNasSetTechnologyPrefInput {
+
+    volatile gint ref_count;
+    struct _SetTechnologyActiveTechPref SetTechnologyActiveTechPref;
+
+};
+
+struct _QmiNasSetTechnologyPrefOutput {
+
+    volatile gint ref_count;
+    GError *error;
+};
+
+void
+qmi_nas_set_technology_pref_input_mask(	QmiNasSetTechnologyPrefInput *input,
+										Set_Technology_Preference technology_pref,
+										Set_Technology_Duration_Preference duration) {
+
+	g_return_if_fail (input != NULL);
+
+	switch(technology_pref) {
+
+//		AUTOMATIC	=	0x00
+//		GSM			=	((1<<2)|(1<<1)) - GSM = 3GPP | Analog
+//		CDMA		=	((1<<3)|(1<<0)) - CDMA = 3GGP2 | Digital
+//		WCDMA		=	((1<<3)|(1<<1)) - WCDMA = 3GGP | Digital
+//		HDR			=	(1<<4)
+//		LTE			=	(1<<5)
+
+		default:
+		case TECHNOLOGY_AUTOMATIC:
+			input->SetTechnologyActiveTechPref.technology_pref = htole16((guint16)(0x00));
+			break;
+
+		case TECHNOLOGY_GSM:
+			input->SetTechnologyActiveTechPref.technology_pref = htole16((guint16)((1<<2)|(1<<1)));
+			break;
+
+		case TECHNOLOGY_CDMA:
+			input->SetTechnologyActiveTechPref.technology_pref = htole16((guint16)((1<<3)|(1<<0)));
+			break;
+
+		case TECHNOLOGY_WCDMA:
+			input->SetTechnologyActiveTechPref.technology_pref = htole16((guint16)((1<<3)|(1<<1)));
+			break;
+
+		case TECHNOLOGY_HDR:
+			input->SetTechnologyActiveTechPref.technology_pref = htole16((guint16)(1<<4));
+			break;
+
+		case TECHNOLOGY_LTE:
+			input->SetTechnologyActiveTechPref.technology_pref = htole16((guint16)(1<<5));
+			break;
+
+	}
+
+	switch(duration) {
+
+		default:
+		case TECHNOLOGY_PERMANENT:
+			input->SetTechnologyActiveTechPref.technology_duration = (guint8)(0x00);
+			break;
+
+		case TECHNOLOGY_POWER_CYCLE:
+			input->SetTechnologyActiveTechPref.technology_duration = (guint8)(0x01);
+			break;
+
+	}
+
+}
+
+QmiNasSetTechnologyPrefInput*
+qmi_nas_set_technology_pref_input_ref (QmiNasSetTechnologyPrefInput *input) {
+
+	g_return_val_if_fail (input != NULL, NULL);
+
+	g_atomic_int_inc (&input->ref_count);
+
+	return input;
+}
+
+void
+qmi_nas_set_technology_pref_input_unref (QmiNasSetTechnologyPrefInput *input) {
+
+	g_return_if_fail (input != NULL);
+
+	if (g_atomic_int_dec_and_test (&input->ref_count)) {
+		g_slice_free (QmiNasSetTechnologyPrefInput, input);
+	}
+}
+
+QmiNasSetTechnologyPrefInput*
+qmi_nas_set_technology_pref_input_new (void) {
+
+	QmiNasSetTechnologyPrefInput *input;
+
+	input = g_slice_new0 (QmiNasSetTechnologyPrefInput);
+	input->ref_count = 1;
+	return input;
+}
+
+gboolean
+qmi_nas_set_technology_pref_output_get_result(QmiNasSetTechnologyPrefOutput *output, GError **error) {
+
+	g_return_val_if_fail (output != NULL, FALSE);
+
+	if (output->error)
+	{
+		if (error)
+			*error = g_error_copy (output->error);
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+QmiNasSetTechnologyPrefOutput*
+qmi_nas_set_technology_pref_output_ref(QmiNasSetTechnologyPrefOutput *output) {
+
+	g_return_val_if_fail (output != NULL, NULL);
+
+	g_atomic_int_inc (&output->ref_count);
+
+	return output;
+}
+
+void
+qmi_nas_set_technology_pref_output_unref(QmiNasSetTechnologyPrefOutput *output) {
+
+	g_return_if_fail (output != NULL);
+
+	if (g_atomic_int_dec_and_test (&output->ref_count)) {
+
+		if (output->error)
+			g_error_free (output->error);
+		g_slice_free (QmiNasSetTechnologyPrefOutput, output);
+	}
+}
+
+QmiMessage*
+qmi_message_nas_set_technology_pref_new(	guint8 transaction_id,
+											guint8 client_id,
+											QmiNasSetTechnologyPrefInput *input,
+											GError **error) {
+
+	QmiMessage *message;
+
+	message = qmi_message_new(	QMI_SERVICE_NAS,
+								client_id,
+								transaction_id,
+								QMI_NAS_MESSAGE_SET_TECHNOLOGY_PREF);
+
+	if(input) {
+
+		if(!qmi_message_tlv_add(message,
+								QMI_NAS_TLV_SET_TECHNOLOGY_PREF,
+								sizeof(input->SetTechnologyActiveTechPref),
+								&input->SetTechnologyActiveTechPref,
+								error)) {
+
+			g_prefix_error(error, "Failed to add SetTechnologyActiveTechPref Request Info to message: ");
+			g_error_free(*error);
+			qmi_message_unref(message);
+			return NULL;
+		}
+
+	}
+
+
+	return message;
+}
+
+QmiNasSetTechnologyPrefOutput*
+qmi_message_nas_set_technology_pref_reply_parse(QmiMessage *self, GError **error) {
+
+	QmiNasSetTechnologyPrefOutput *output;
+	GError *inner_error = NULL;
+
+	g_assert(qmi_message_get_message_id(self) == QMI_NAS_MESSAGE_SET_TECHNOLOGY_PREF);
+
+	if (!qmi_message_get_response_result(self, &inner_error)) {
+		/* Only QMI protocol errors are set in the Output result, all the
+		 * others (e.g. failures parsing) are directly propagated to error. */
+		if (inner_error->domain != QMI_PROTOCOL_ERROR) {
+			g_propagate_error (error, inner_error);
+			return NULL;
+		}
+
+		/* Otherwise, build output */
+	}
+
+	output = g_slice_new0 (QmiNasSetTechnologyPrefOutput);
+	output->ref_count = 1;
+	output->error = inner_error;
+
+
+	return output;
+}

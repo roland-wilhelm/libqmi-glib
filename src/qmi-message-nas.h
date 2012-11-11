@@ -71,6 +71,32 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 QmiNasSetSystemSelectionPrefOutput*
 qmi_message_nas_set_system_selection_pref_reply_parse(QmiMessage *self, GError **error);
 
+
+/*****************************************************************************/
+/* Set Technology Preference */
+
+QmiMessage*
+qmi_message_nas_set_technology_pref_new(	guint8 transaction_id,
+											guint8 client_id,
+											QmiNasSetTechnologyPrefInput *input,
+											GError **error);
+
+QmiNasSetTechnologyPrefOutput*
+qmi_message_nas_set_technology_pref_reply_parse(QmiMessage *self, GError **error);
+
+/*****************************************************************************/
+/* Get Technology Preference */
+
+QmiMessage*
+qmi_message_nas_get_technology_pref_new(	guint8 transaction_id,
+											guint8 client_id,
+											GError **error);
+
+QmiNasGetTechnologyPrefOutput*
+qmi_message_nas_get_technology_pref_reply_parse(QmiMessage *self, GError **error);
+
+
+
 G_END_DECLS
 
 

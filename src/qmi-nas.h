@@ -18,14 +18,16 @@ G_BEGIN_DECLS
 typedef enum {
 	QMI_NAS_MESSAGE_GET_SIGNAL_STRENGTH				=	0x0020, /* v1.0 needed - deprecated - */
     QMI_NAS_MESSAGE_PERFORM_NETWORK_SCAN			=	0x0021, /* v1.0 needed, unused currently */
+    QMI_NAS_MESSAGE_SET_TECHNOLOGY_PREF				=	0x002A, /* v1.7 needed - deprecated - */
+    QMI_NAS_MESSAGE_GET_TECHNOLOGY_PREF				=	0x002B, /* v1.7 needed - deprecated - */
     QMI_NAS_MESSAGE_GET_RF_BAND_INFO				=	0x0031, /* v1.1 needed */
-    QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREF		= 	0x0033, /* v1.1 needed, unused currently */
+    QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREF		= 	0x0033, /* v1.1 needed */
     QMI_NAS_MESAGE_GET_SYSTEM_SELECTION_PREF		=	0x0034,
     QMI_NAS_MESSAGE_GET_CELL_LOCATION_INFO			=	0x0043, /* v1.4 needed */
     QMI_NAS_MAESSAGE_GET_SYS_INFO					=	0x004D, /* v1.8 needed */
     QMI_NAS_MESSAGE_GET_SIG_INFO					=	0x004F, /* v1.8 needed */
-    QMI_NAS_MESSAGE_GET_ERR_RATE					=	0x0052, /* v1.8 needed, unused currently NO LTE */
-    QMI_NAS_MESSAGE_GET_TX_RX_INFO					=	0x005A, /* v1.9 needed, unused currently */
+    QMI_NAS_MESSAGE_GET_ERR_RATE					=	0x0052, /* v1.8 needed */
+    QMI_NAS_MESSAGE_GET_TX_RX_INFO					=	0x005A, /* v1.9 needed */
 
 } QmiNasMessage;
 
@@ -147,6 +149,32 @@ qmi_nas_get_system_selection_pref_output_unref(QmiNasGetSystemSelectionPrefOutpu
 typedef struct _QmiNasSetSystemSelectionPrefOutput QmiNasSetSystemSelectionPrefOutput;
 typedef struct _QmiNasSetSystemSelectionPrefInput QmiNasSetSystemSelectionPrefInput;
 
+typedef enum {
+
+	SYSTEM_SELECTION_MODE_AUTOMATIC,
+	SYSTEM_SELECTION_GSM,
+	SYSTEM_SELECTION_UMTS,
+	SYSTEM_SELECTION_LTE
+
+}Set_System_Selection_Mode_Preference;
+
+typedef enum {
+
+	SYSTEM_SELECTION_BAND_AUTOMATIC,
+	SYSTEM_SELECTION_BAND_7,		/* LTE 2,6 GHz Band 7 */
+	SYSTEM_SELECTION_BAND_20,		/* LTE 800 MHz Band 20 */
+	SYSTEM_SELECTION_BAND_3
+
+}Set_System_Selection_LTE_Band_Preference;
+
+typedef enum {
+
+	SYSTEM_SELECTION_POWER_CYCLE,
+	SYSTEM_SELECTION_PERMANENT
+
+}Set_System_Selection_Change_Duration;
+
+
 void
 qmi_nas_set_system_selection_pref_output_unref(QmiNasSetSystemSelectionPrefOutput *output);
 
@@ -158,8 +186,9 @@ qmi_nas_set_system_selection_pref_output_get_result(QmiNasSetSystemSelectionPref
 
 void
 qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput *input,
-												guint16 mode_pref_mask,
-												guint64 lte_band_mask);
+												Set_System_Selection_Mode_Preference mode_pref_mask,
+												Set_System_Selection_LTE_Band_Preference lte_band_mask,
+												Set_System_Selection_Change_Duration change_duration);
 
 QmiNasSetSystemSelectionPrefInput*
 qmi_nas_set_system_selection_pref_input_ref (QmiNasSetSystemSelectionPrefInput *input);
@@ -169,6 +198,80 @@ qmi_nas_set_system_selection_pref_input_unref (QmiNasSetSystemSelectionPrefInput
 
 QmiNasSetSystemSelectionPrefInput*
 qmi_nas_set_system_selection_pref_input_new (void);
+
+
+/*****************************************************************************/
+/* Set Technology Preference */
+
+typedef struct _QmiNasSetTechnologyPrefOutput QmiNasSetTechnologyPrefOutput;
+typedef struct _QmiNasSetTechnologyPrefInput QmiNasSetTechnologyPrefInput;
+
+typedef enum {
+
+	TECHNOLOGY_AUTOMATIC,
+	TECHNOLOGY_GSM	,
+	TECHNOLOGY_CDMA,
+	TECHNOLOGY_WCDMA,
+	TECHNOLOGY_HDR,
+	TECHNOLOGY_LTE
+
+}Set_Technology_Preference;
+
+typedef enum {
+
+	TECHNOLOGY_PERMANENT,
+	TECHNOLOGY_POWER_CYCLE
+
+}Set_Technology_Duration_Preference;
+
+
+void
+qmi_nas_set_technology_pref_input_mask(	QmiNasSetTechnologyPrefInput *input,
+										Set_Technology_Preference technology_pref,
+										Set_Technology_Duration_Preference duration);
+
+QmiNasSetTechnologyPrefInput*
+qmi_nas_set_technology_pref_input_ref (QmiNasSetTechnologyPrefInput *input);
+
+void
+qmi_nas_set_technology_pref_input_unref (QmiNasSetTechnologyPrefInput *input);
+
+QmiNasSetTechnologyPrefInput*
+qmi_nas_set_technology_pref_input_new (void);
+
+gboolean
+qmi_nas_set_technology_pref_output_get_result(QmiNasSetTechnologyPrefOutput *output, GError **error);
+
+QmiNasSetTechnologyPrefOutput*
+qmi_nas_set_technology_pref_output_ref(QmiNasSetTechnologyPrefOutput *output);
+
+void
+qmi_nas_set_technology_pref_output_unref(QmiNasSetTechnologyPrefOutput *output);
+
+
+/*****************************************************************************/
+/* Get Technology Preference */
+
+typedef struct _QmiNasGetTechnologyPrefOutput QmiNasGetTechnologyPrefOutput;
+
+const guint16
+qmi_nas_get_technology_pref_output_get_active_technoloy_pref(QmiNasGetTechnologyPrefOutput *output);
+
+const guint8
+qmi_nas_get_technology_pref_output_get_active_technology_duration_pref(QmiNasGetTechnologyPrefOutput *output);
+
+const guint16
+qmi_nas_get_technology_pref_output_get_persistent_technoloy_pref(QmiNasGetTechnologyPrefOutput *output);
+
+gboolean
+qmi_nas_get_technology_pref_output_get_result(QmiNasGetTechnologyPrefOutput *output, GError **error);
+
+QmiNasGetTechnologyPrefOutput*
+qmi_nas_get_technology_pref_output_ref(QmiNasGetTechnologyPrefOutput *output);
+
+void
+qmi_nas_get_technology_pref_output_unref(QmiNasGetTechnologyPrefOutput *output);
+
 
 
 G_END_DECLS
