@@ -637,6 +637,15 @@ qmi_client_nas_set_system_selection_pref(QmiClientNas *self,
 		return;
 	}
 
+#define SET_SYSTEM_SELECTION_INPUT
+#ifdef SET_SYSTEM_SELECTION_INPUT
+	g_print("Output of the 'qmi_client_nas_set_system_selection_pref' input data", input->lte_band_mask);
+	g_print("LTE-Band: %d", input->lte_band_mask);
+	g_print("Technologie: %d", input->mode_pref_mask);
+	g_print("Change duration: %d", input->change_duration);
+
+#endif
+
     qmi_device_command((QmiDevice *)qmi_client_peek_device(QMI_CLIENT (self)),
                         request,
                         timeout,
