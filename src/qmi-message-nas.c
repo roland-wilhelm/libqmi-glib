@@ -730,10 +730,10 @@ qmi_nas_get_rf_band_output_get_active_band(QmiNasGetRfBandOutput *output, guint8
 
     g_return_val_if_fail (output != NULL, NULL);
 
-
     if((index >= 0) && (index < output->instances)) {
 
 		return qmi_band_enum_get_string(le16toh(output->rfBand[index]->active_band));
+
 	}
 	else {
 
@@ -878,6 +878,11 @@ qmi_message_nas_get_rf_band_reply_parse(QmiMessage *self, GError **error)
 		}
 		memcpy(output->rfBand[i], &pResponse[index], sizeof(struct _RfBand));
 		index += sizeof(struct _RfBand);
+
+//		g_print("\n-------------------------\n");
+//		g_print("qmi_nas_active_band-parse: %X\n", output->rfBand[i]->active_band);
+//		g_print("qmi_nas_active_if-parse: %X\n", output->rfBand[i]->radio_if);
+//		g_print("-------------------------\n");
 
 	}
 
@@ -1608,40 +1613,49 @@ qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput 
 
     	default:
 		case SYSTEM_SELECTION_BAND_AUTOMATIC:
-			input->lte_band_mask = htole64((guint64)(0xFFFFFFFFFFFFFFFFull)); // ALL
+			input->lte_band_mask = htole64((guint64)(0xffffffff)); // ALL 0x40 | 0x04 | 0x80000
+			//g_print("Automatik Baender gewaehlt.\n");
 			break;
 
 		case SYSTEM_SELECTION_BAND_7:
-			input->lte_band_mask = htole64((guint64)(1<<6));	/* LTE 2,6 GHz Band 7 */
+			input->lte_band_mask = htole64((guint64)(0x40));	/* LTE 2,6 GHz Band 7 */
+			//g_print("Band 7 gewaehlt.\n");
 			break;
 
 		case SYSTEM_SELECTION_BAND_3:
-			input->lte_band_mask = htole64((guint64)(1<<2));
+			input->lte_band_mask = htole64((guint64)(0x04));
+			//g_print("Band 3 gewaehlt.\n");
 			break;
 
 		case SYSTEM_SELECTION_BAND_20:
-			input->lte_band_mask = htole64((guint64)(1<<19));			/* LTE 800 MHz Band 20 */
+			input->lte_band_mask = htole64((guint64)(0x80000));			/* LTE 800 MHz Band 20 */
+			//g_print("Band 20 gewaehlt.\n");
 			break;
 
 	}
+
 
     switch(mode_pref_mask) {
 
     	default:
 		case SYSTEM_SELECTION_MODE_AUTOMATIC:
-			input->mode_pref_mask = htole16((guint16)(0xFF));	// ALL
+			input->mode_pref_mask = htole16((guint16)((1<<2) | (1<<3) | (1<<4)));	// ALL
+			//g_print("Automatik  gewaehlt.\n");
 			break;
 
 		case SYSTEM_SELECTION_GSM:
 			input->mode_pref_mask = htole16((guint16)(1<<2));	// GSM
+			//g_print("GSM gewaehlt.\n");
 			break;
 
 		case SYSTEM_SELECTION_UMTS:
 			input->mode_pref_mask = htole16((guint16)(1<<3));	// UMTS
+			//g_print("UMTS gewaehlt.\n");
 			break;
 
 		case SYSTEM_SELECTION_LTE:
 			input->mode_pref_mask = htole16((guint16)(1<<4));	// LTE
+			//g_print("LTE gewaehlt.\n");
 			break;
 
 	}
@@ -1750,11 +1764,30 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 								transaction_id,
 								QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREF);
 
+//#define SET_SYSTEM_SELECTION_INPUT
+#ifdef SET_SYSTEM_SELECTION_INPUT
+	g_print("Output of the 'qmi_message_nas_set_system_selection_pref' input data\n");
+	g_print("Gewaehltes LTE-Band: %016lluX\n", input->lte_band_mask);
+	g_print("Gewaehltes Technologie: %016X\n", input->mode_pref_mask);
+	g_print("Gewaehltes Change duration: %d\n", input->change_duration);
 
+#endif
 
 	if(input) {
 
-		if(input->mode_pref_mask == SYSTEM_SELECTION_LTE) {
+		if(!qmi_message_tlv_add(message,
+								QMI_NAS_TLV_SET_MODE_PREF,
+								sizeof(input->mode_pref_mask),
+								&input->mode_pref_mask,
+								error)) {
+
+			g_prefix_error(error, "Failed to add mode_pref_mask Request Info to message: ");
+			g_error_free(*error);
+			qmi_message_unref(message);
+			return NULL;
+		}
+
+		if(input->mode_pref_mask == htole16((guint16)(1<<4))) {
 
 			if(!qmi_message_tlv_add(message,
 							QMI_NAS_TLV_SET_LTE_BAND_PREF,
@@ -1769,17 +1802,7 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 			}
 		}
 
-		if(!qmi_message_tlv_add(message,
-								QMI_NAS_TLV_SET_MODE_PREF,
-								sizeof(input->mode_pref_mask),
-								&input->mode_pref_mask,
-								error)) {
 
-			g_prefix_error(error, "Failed to add mode_pref_mask Request Info to message: ");
-			g_error_free(*error);
-			qmi_message_unref(message);
-			return NULL;
-		}
 
 		/* Change Duration is set to Power cycle - remains active until the next device power cycle */
 		if(!qmi_message_tlv_add(message,

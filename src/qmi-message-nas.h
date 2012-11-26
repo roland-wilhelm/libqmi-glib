@@ -60,7 +60,7 @@ qmi_message_nas_get_system_selection_pref_reply_parse(QmiMessage *self, GError *
 
 
 /*****************************************************************************/
-/* Get System Selection Preference */
+/* Set System Selection Preference */
 
 QmiMessage*
 qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,

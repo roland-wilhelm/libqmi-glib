@@ -53,6 +53,18 @@ AC_CONFIG_FILES([Makefile
                  qmi-glib.pc])
 AC_OUTPUT
 
+dnl Protocol message tracing
+AC_ARG_WITH(traces, AS_HELP_STRING([--with-qmi-traces], [Enable protocol debugging traces]))
+AM_CONDITIONAL(WITH_QMI_TRACES, test "x$with_qmi_traces" = "xyes")
+case $with_qmi_traces in
+ yes)
+ CFLAGS="-DMESSAGE_ENABLE_TRACE $CFLAGS"
+ ;;
+ *)
+ ;;
+esac
+
+
 echo "
     libqmi-glib $VERSION
     ==============================================
