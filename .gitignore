@@ -41,3 +41,5 @@ src/qmi-enum-types.c
 cli/.deps
 cli/.libs
 cli/qmicli
+.metadata/
+*.la
