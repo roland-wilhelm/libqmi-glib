@@ -1613,7 +1613,7 @@ qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput 
 
     	default:
 		case SYSTEM_SELECTION_BAND_AUTOMATIC:
-			input->lte_band_mask = htole64((guint64)(0xffffffff)); // ALL 0x40 | 0x04 | 0x80000
+			input->lte_band_mask = htole64((guint64)(0x40 | 0x80000)); // ALL
 			//g_print("Automatik Baender gewaehlt.\n");
 			break;
 
@@ -2081,7 +2081,7 @@ qmi_nas_set_technology_pref_input_mask(	QmiNasSetTechnologyPrefInput *input,
 			break;
 
 		case TECHNOLOGY_LTE:
-			input->SetTechnologyActiveTechPref.technology_pref = htole16((guint16)(1<<5));
+			input->SetTechnologyActiveTechPref.technology_pref = htole16((guint16)(1<<5)|(1<<1));
 			break;
 
 	}
