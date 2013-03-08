@@ -1614,22 +1614,22 @@ qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput 
     	default:
 		case SYSTEM_SELECTION_BAND_AUTOMATIC:
 			input->lte_band_mask = htole64((guint64)(0x40 | 0x80000)); // ALL
-			//g_print("Automatik Baender gewaehlt.\n");
+
 			break;
 
 		case SYSTEM_SELECTION_BAND_7:
 			input->lte_band_mask = htole64((guint64)(0x40));	/* LTE 2,6 GHz Band 7 */
-			//g_print("Band 7 gewaehlt.\n");
+
 			break;
 
 		case SYSTEM_SELECTION_BAND_3:
 			input->lte_band_mask = htole64((guint64)(0x04));
-			//g_print("Band 3 gewaehlt.\n");
+
 			break;
 
 		case SYSTEM_SELECTION_BAND_20:
 			input->lte_band_mask = htole64((guint64)(0x80000));			/* LTE 800 MHz Band 20 */
-			//g_print("Band 20 gewaehlt.\n");
+
 			break;
 
 	}
@@ -1640,22 +1640,22 @@ qmi_nas_set_system_selection_pref_input_mask(	QmiNasSetSystemSelectionPrefInput 
     	default:
 		case SYSTEM_SELECTION_MODE_AUTOMATIC:
 			input->mode_pref_mask = htole16((guint16)((1<<2) | (1<<3) | (1<<4)));	// ALL
-			//g_print("Automatik  gewaehlt.\n");
+
 			break;
 
 		case SYSTEM_SELECTION_GSM:
 			input->mode_pref_mask = htole16((guint16)(1<<2));	// GSM
-			//g_print("GSM gewaehlt.\n");
+
 			break;
 
 		case SYSTEM_SELECTION_UMTS:
 			input->mode_pref_mask = htole16((guint16)(1<<3));	// UMTS
-			//g_print("UMTS gewaehlt.\n");
+
 			break;
 
 		case SYSTEM_SELECTION_LTE:
 			input->mode_pref_mask = htole16((guint16)(1<<4));	// LTE
-			//g_print("LTE gewaehlt.\n");
+
 			break;
 
 	}
@@ -1764,57 +1764,58 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 								transaction_id,
 								QMI_NAS_MESSAGE_SET_SYSTEM_SELECTION_PREF);
 
-//#define SET_SYSTEM_SELECTION_INPUT
-#ifdef SET_SYSTEM_SELECTION_INPUT
-	g_print("Output of the 'qmi_message_nas_set_system_selection_pref' input data\n");
-	g_print("Gewaehltes LTE-Band: %016lluX\n", input->lte_band_mask);
-	g_print("Gewaehltes Technologie: %016X\n", input->mode_pref_mask);
-	g_print("Gewaehltes Change duration: %d\n", input->change_duration);
 
-#endif
 
 	if(input) {
 
-		if(!qmi_message_tlv_add(message,
-								QMI_NAS_TLV_SET_MODE_PREF,
-								sizeof(input->mode_pref_mask),
-								&input->mode_pref_mask,
-								error)) {
-
-			g_prefix_error(error, "Failed to add mode_pref_mask Request Info to message: ");
-			g_error_free(*error);
-			qmi_message_unref(message);
-			return NULL;
-		}
-
-		if(input->mode_pref_mask == htole16((guint16)(1<<4))) {
+		if(input->mode_pref_mask != TECHNOLOGY_UNCHANGED) {
 
 			if(!qmi_message_tlv_add(message,
-							QMI_NAS_TLV_SET_LTE_BAND_PREF,
-							sizeof(input->lte_band_mask),
-							&input->lte_band_mask,
-							error)) {
+									QMI_NAS_TLV_SET_MODE_PREF,
+									sizeof(input->mode_pref_mask),
+									&input->mode_pref_mask,
+									error)) {
 
-			g_prefix_error(error, "Failed to add lte_band_mask Request Info to message: ");
-			g_error_free(*error);
-			qmi_message_unref(message);
-			return NULL;
+				g_prefix_error(error, "Failed to add mode_pref_mask Request Info to message: ");
+				g_error_free(*error);
+				qmi_message_unref(message);
+				return NULL;
 			}
 		}
 
+		if(input->lte_band_mask != BAND_UNCHANEGED) {
 
+			if(input->mode_pref_mask == htole16((guint16)(1<<4))) {
 
-		/* Change Duration is set to Power cycle - remains active until the next device power cycle */
-		if(!qmi_message_tlv_add(message,
-								QMI_NAS_TLV_SET_CHANGE_DURATION,
-								sizeof(input->change_duration),
-								&input->change_duration,
+				if(!qmi_message_tlv_add(message,
+								QMI_NAS_TLV_SET_LTE_BAND_PREF,
+								sizeof(input->lte_band_mask),
+								&input->lte_band_mask,
 								error)) {
 
-			g_prefix_error(error, "Failed to add set change duration Request Info to message: ");
-			g_error_free(*error);
-			qmi_message_unref(message);
-			return NULL;
+				g_prefix_error(error, "Failed to add lte_band_mask Request Info to message: ");
+				g_error_free(*error);
+				qmi_message_unref(message);
+				return NULL;
+				}
+			}
+
+		}
+
+		if(input->change_duration != DURATION_UNCHANGED) {
+
+			/* Change Duration is set to Power cycle - remains active until the next device power cycle */
+			if(!qmi_message_tlv_add(message,
+									QMI_NAS_TLV_SET_CHANGE_DURATION,
+									sizeof(input->change_duration),
+									&input->change_duration,
+									error)) {
+
+				g_prefix_error(error, "Failed to add set change duration Request Info to message: ");
+				g_error_free(*error);
+				qmi_message_unref(message);
+				return NULL;
+			}
 		}
 	}
 
