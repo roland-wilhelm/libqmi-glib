@@ -15,6 +15,8 @@
 #include "qmi-utils.h"
 #include "qmi-band-types.h"
 #include "qmi-mobile-network-code.h"
+
+#include <glib.h>
 #include <string.h>
 
 
@@ -1768,7 +1770,6 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 
 	if(input) {
 
-		if(input->mode_pref_mask != TECHNOLOGY_UNCHANGED) {
 
 			if(!qmi_message_tlv_add(message,
 									QMI_NAS_TLV_SET_MODE_PREF,
@@ -1781,9 +1782,8 @@ qmi_message_nas_set_system_selection_pref_new(	guint8 transaction_id,
 				qmi_message_unref(message);
 				return NULL;
 			}
-		}
 
-		if(input->lte_band_mask != BAND_UNCHANEGED) {
+		if(input->lte_band_mask != BAND_UNCHANGED) {
 
 			if(input->mode_pref_mask == htole16((guint16)(1<<4))) {
 

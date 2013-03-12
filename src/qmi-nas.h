@@ -165,7 +165,7 @@ typedef enum {
 	SYSTEM_SELECTION_BAND_7,		/* LTE 2,6 GHz Band 7 */
 	SYSTEM_SELECTION_BAND_20,		/* LTE 800 MHz Band 20 */
 	SYSTEM_SELECTION_BAND_3,
-	BAND_UNCHANEGED
+	BAND_UNCHANGED
 
 
 }Set_System_Selection_LTE_Band_Preference;
